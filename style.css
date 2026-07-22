@@ -1,0 +1,81 @@
+/*
+  This is a CSS file. CSS controls how the page LOOKS —
+  colors, fonts, spacing, layout. The HTML says "here is a heading";
+  the CSS says "make headings big and blue".
+
+  A CSS rule looks like this:
+      selector {
+        property: value;
+      }
+  The "selector" picks WHAT to style, and the properties say HOW.
+*/
+
+/* Style the whole page background and default text. */
+body {
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  margin: 0;
+  background: #f4f1ea;
+  color: #2b2b2b;
+  line-height: 1.6;
+}
+
+/* The big banner at the top. */
+.hero {
+  background: linear-gradient(135deg, #ffb703, #fb8500);
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  opacity: 0.95;
+  margin-top: 8px;
+}
+
+/* "main" holds the page's main content, centered with breathing room. */
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+/* Each white "card" box. The class="card" in the HTML matches ".card" here. */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+/* The clickable button. */
+button {
+  background: #fb8500;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e07600;
+}
+
+footer {
+  text-align: center;
+  padding: 24px;
+  color: #777;
+  font-size: 0.9rem;
+}

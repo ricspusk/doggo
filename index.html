@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--
+  This is an HTML file. HTML is the "skeleton" of every web page —
+  it describes WHAT is on the page (headings, paragraphs, images, buttons).
+  Anything between <!-- and --> like this is a COMMENT: the browser ignores it.
+  It's just here to explain things to you.
+-->
+<html lang="en">
+  <head>
+    <!--
+      The <head> holds information ABOUT the page that visitors don't see
+      directly: its title (shown in the browser tab), character settings,
+      and links to styling files.
+    -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doggo — My First Website</title>
+
+    <!-- This line connects our styling file (style.css) to this page. -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!--
+      The <body> is everything a visitor actually SEES on the page.
+      Try changing the text below, then save and refresh your browser.
+    -->
+    <header class="hero">
+      <h1>🐕 Doggo</h1>
+      <p class="tagline">My very first website. Made from scratch.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Hello, world!</h2>
+        <p>
+          You're looking at a real web page. It's made of three ingredients
+          that every website uses:
+        </p>
+        <ul>
+          <li><strong>HTML</strong> — the structure (this file).</li>
+          <li><strong>CSS</strong> — the styling and colors (style.css).</li>
+          <li><strong>JavaScript</strong> — interactivity (the button below).</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Try it</h2>
+        <p>Click the button and watch something change:</p>
+        <button id="petButton">Pet the doggo</button>
+        <p id="pets">Pets given: 0</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Built by ricspusk &middot; Edit me and make me yours.</p>
+    </footer>
+
+    <!--
+      This is a tiny bit of JavaScript. It makes the button count clicks.
+      Don't worry about understanding it fully yet — just know this is
+      where "things that happen when you interact" live.
+    -->
+    <script>
+      let count = 0;
+      const button = document.getElementById("petButton");
+      const label = document.getElementById("pets");
+      button.addEventListener("click", function () {
+        count = count + 1;
+        label.textContent = "Pets given: " + count;
+      });
+    </script>
+  </body>
+</html>
