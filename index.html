@@ -1,73 +1,311 @@
 <!DOCTYPE html>
-<!--
-  This is an HTML file. HTML is the "skeleton" of every web page —
-  it describes WHAT is on the page (headings, paragraphs, images, buttons).
-  Anything between <!-- and --> like this is a COMMENT: the browser ignores it.
-  It's just here to explain things to you.
--->
-<html lang="en">
+<html lang="it">
   <head>
-    <!--
-      The <head> holds information ABOUT the page that visitors don't see
-      directly: its title (shown in the browser tab), character settings,
-      and links to styling files.
-    -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Doggo — My First Website</title>
-
-    <!-- This line connects our styling file (style.css) to this page. -->
+    <title>Emporio Animale — Alta accessoristica felina · Milano</title>
+    <meta
+      name="description"
+      content="Emporio Animale — accessori di alta gamma per il gatto. Collari, ciotole e cucce disegnati a Milano. Bianco e nero, senza compromessi."
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
-
   <body>
-    <!--
-      The <body> is everything a visitor actually SEES on the page.
-      Try changing the text below, then save and refresh your browser.
-    -->
-    <header class="hero">
-      <h1>🐕 Doggo</h1>
-      <p class="tagline">My very first website. Made from scratch.</p>
+    <!-- Reusable cat emblem (defined once, referenced with <use>) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="cat" viewBox="0 0 120 120">
+        <g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M34 48 L26 20 L54 40" />
+          <path d="M86 48 L94 20 L66 40" />
+          <path d="M54 40 C46 42 34 46 32 60 C30 74 38 90 60 96 C82 90 90 74 88 60 C86 46 74 42 66 40" />
+          <path d="M42 64 C46 60 52 60 56 64 C52 68 46 68 42 64 Z" />
+          <path d="M64 64 C68 60 74 60 78 64 C74 68 68 68 64 64 Z" />
+          <path d="M49 61 L49 67" />
+          <path d="M71 61 L71 67" />
+          <path d="M56 74 L64 74 L60 79 Z" />
+          <path d="M60 79 L60 83 M60 83 C56 87 52 86 50 83 M60 83 C64 87 68 86 70 83" />
+          <path d="M34 72 L10 66 M34 78 L8 78 M34 84 L12 90" />
+          <path d="M86 72 L110 66 M86 78 L112 78 M86 84 L108 90" />
+        </g>
+      </symbol>
+    </svg>
+
+    <div class="ticker">Spedizione premium in tutta Europa — Confezione firmata inclusa</div>
+
+    <header class="site-header">
+      <nav class="nav container" aria-label="Principale">
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="nav-left">
+          <a href="#collezione">Collezione</a>
+          <a href="#gatto">Il Gatto</a>
+          <a href="#maison">La Maison</a>
+        </div>
+        <a class="brand" href="#top" aria-label="Emporio Animale">
+          <span class="mark"><svg><use href="#cat" /></svg></span>
+          <span class="word">Emporio Animale</span>
+          <span class="sub">Milano</span>
+        </a>
+        <div class="nav-right">
+          <a href="#" class="hide-sm">Cerca</a>
+          <a href="#" class="hide-sm">Account</a>
+          <a href="#" id="bagLink">Borsa (<span id="bagCount">0</span>)</a>
+        </div>
+      </nav>
     </header>
 
-    <main>
-      <section class="card">
-        <h2>Hello, world!</h2>
-        <p>
-          You're looking at a real web page. It's made of three ingredients
-          that every website uses:
-        </p>
-        <ul>
-          <li><strong>HTML</strong> — the structure (this file).</li>
-          <li><strong>CSS</strong> — the styling and colors (style.css).</li>
-          <li><strong>JavaScript</strong> — interactivity (the button below).</li>
-        </ul>
+    <main id="top">
+      <!-- HERO -->
+      <section class="hero" id="collezione">
+        <svg class="hero__emblem" aria-hidden="true"><use href="#cat" /></svg>
+        <div class="hero__grain"></div>
+        <div class="hero__inner reveal">
+          <p class="eyebrow">Primavera / Estate 2026</p>
+          <h1>Per il felino <em>che non chiede</em> permesso</h1>
+          <p class="hero__tag">
+            Alta accessoristica per il gatto. Pelle, marmo e cashmere,
+            in un dialogo di solo bianco e nero. Disegnato a Milano.
+          </p>
+          <div class="hero__cta">
+            <a class="link-underline" href="#collezione">Scopri la collezione</a>
+            <a class="link-underline" href="#lookbook">Guarda il lookbook</a>
+          </div>
+        </div>
       </section>
 
-      <section class="card">
-        <h2>Try it</h2>
-        <p>Click the button and watch something change:</p>
-        <button id="petButton">Pet the doggo</button>
-        <p id="pets">Pets given: 0</p>
+      <!-- EDITORIAL SPLIT -->
+      <section class="container">
+        <div class="split">
+          <div class="split__media reveal">
+            <svg aria-hidden="true"><use href="#cat" /></svg>
+            <span class="tag">Atelier · Milano</span>
+          </div>
+          <div class="split__body reveal">
+            <p class="eyebrow">La filosofia</p>
+            <h2>Il lusso è un gesto silenzioso.</h2>
+            <p>
+              Ogni pezzo nasce da un solo principio: il gatto non porta un
+              accessorio, lo indossa. Materiali nobili, linee essenziali,
+              nessun colore a distrarre — soltanto il contrasto assoluto
+              del bianco e del nero.
+            </p>
+            <p>
+              Realizzato a mano in piccole serie, numerato, garantito a vita.
+            </p>
+            <a class="link-underline" href="#gatto">La nostra storia</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORIES -->
+      <section class="container" id="gatto">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Le categorie</p>
+            <h2>Tre mondi, un solo standard</h2>
+          </div>
+          <a class="link-underline" href="#collezione">Vedi tutto</a>
+        </div>
+        <div class="tiles">
+          <a class="tile reveal" href="#collezione">
+            <div class="tile__art"><svg><use href="#cat" /></svg></div>
+            <div class="tile__label"><span class="k">01 — Da indossare</span><div class="t">Il Collare</div></div>
+          </a>
+          <a class="tile reveal" href="#collezione">
+            <div class="tile__art"><svg><use href="#cat" /></svg></div>
+            <div class="tile__label"><span class="k">02 — Alla tavola</span><div class="t">La Ciotola</div></div>
+          </a>
+          <a class="tile reveal" href="#maison">
+            <div class="tile__art"><svg><use href="#cat" /></svg></div>
+            <div class="tile__label"><span class="k">03 — In casa</span><div class="t">La Maison</div></div>
+          </a>
+        </div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">La selezione</p>
+            <h2>Icone della stagione</h2>
+          </div>
+          <a class="link-underline" href="#collezione">Tutta la collezione</a>
+        </div>
+        <div class="products">
+          <article class="product reveal">
+            <div class="product__frame">
+              <svg><use href="#cat" /></svg>
+              <button class="product__add" data-name="Collare Nero Firenze">Aggiungi alla borsa</button>
+            </div>
+            <div class="product__meta">
+              <div><div class="product__name">Collare “Nero Firenze”</div><div class="product__cat">Pelle intrecciata</div></div>
+              <div class="product__price">€ 180</div>
+            </div>
+          </article>
+          <article class="product reveal">
+            <div class="product__frame">
+              <svg><use href="#cat" /></svg>
+              <button class="product__add" data-name="Guinzaglio Catena Milano">Aggiungi alla borsa</button>
+            </div>
+            <div class="product__meta">
+              <div><div class="product__name">Guinzaglio “Catena”</div><div class="product__cat">Ottone brunito</div></div>
+              <div class="product__price">€ 220</div>
+            </div>
+          </article>
+          <article class="product reveal">
+            <div class="product__frame">
+              <svg><use href="#cat" /></svg>
+              <button class="product__add" data-name="Ciotola Marmo Carrara">Aggiungi alla borsa</button>
+            </div>
+            <div class="product__meta">
+              <div><div class="product__name">Ciotola “Carrara”</div><div class="product__cat">Marmo massello</div></div>
+              <div class="product__price">€ 240</div>
+            </div>
+          </article>
+          <article class="product reveal">
+            <div class="product__frame">
+              <svg><use href="#cat" /></svg>
+              <button class="product__add" data-name="Cuccia Cashmere Notte">Aggiungi alla borsa</button>
+            </div>
+            <div class="product__meta">
+              <div><div class="product__name">Cuccia “Notte”</div><div class="product__cat">Cashmere puro</div></div>
+              <div class="product__price">€ 890</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- MANIFESTO -->
+      <section class="manifesto" id="maison">
+        <div class="container reveal">
+          <blockquote>Ogni dettaglio è una firma.</blockquote>
+          <p>
+            Non produciamo accessori. Componiamo un guardaroba per chi,
+            in casa, comanda davvero. Una collezione all'anno, mai una di più.
+          </p>
+        </div>
+      </section>
+
+      <!-- LOOKBOOK -->
+      <section class="container" id="lookbook">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Il lookbook</p>
+            <h2>Campagna SS26</h2>
+          </div>
+          <a class="link-underline" href="#collezione">Sfoglia</a>
+        </div>
+        <div class="lookbook">
+          <figure class="reveal"><svg><use href="#cat" /></svg></figure>
+          <figure class="reveal"><svg><use href="#cat" /></svg></figure>
+          <figure class="reveal"><svg><use href="#cat" /></svg></figure>
+        </div>
+      </section>
+
+      <!-- NEWSLETTER -->
+      <section class="newsletter">
+        <div class="container reveal">
+          <p class="eyebrow">Il club</p>
+          <h2>Accesso anticipato alle collezioni</h2>
+          <p>Iscriviti per ricevere i lookbook in anteprima e gli inviti privati.</p>
+          <form class="subscribe" id="subscribe" novalidate>
+            <input type="email" placeholder="La vostra email" aria-label="Email" required />
+            <button type="submit">Iscriviti</button>
+          </form>
+        </div>
       </section>
     </main>
 
-    <footer>
-      <p>Built by ricspusk &middot; Edit me and make me yours.</p>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="word">Emporio Animale</div>
+            <p>
+              Alta accessoristica felina. Disegnato e realizzato a mano a Milano.
+              Bianco, nero, null'altro.
+            </p>
+          </div>
+          <div class="fcol">
+            <h4>Servizio Clienti</h4>
+            <ul>
+              <li><a href="#">Contatti</a></li>
+              <li><a href="#">Spedizioni &amp; resi</a></li>
+              <li><a href="#">Cura dei materiali</a></li>
+              <li><a href="#">Guida alle taglie</a></li>
+            </ul>
+          </div>
+          <div class="fcol">
+            <h4>La Maison</h4>
+            <ul>
+              <li><a href="#">La nostra storia</a></li>
+              <li><a href="#">Atelier di Milano</a></li>
+              <li><a href="#">Sostenibilità</a></li>
+              <li><a href="#">Boutique</a></li>
+            </ul>
+          </div>
+          <div class="fcol">
+            <h4>Seguici</h4>
+            <ul>
+              <li><a href="#">Instagram</a></li>
+              <li><a href="#">Pinterest</a></li>
+              <li><a href="#">Newsletter</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-base">
+          <span>© 2026 Emporio Animale — Milano</span>
+          <span>Marchio concettuale · Progetto dimostrativo</span>
+        </div>
+      </div>
     </footer>
 
-    <!--
-      This is a tiny bit of JavaScript. It makes the button count clicks.
-      Don't worry about understanding it fully yet — just know this is
-      where "things that happen when you interact" live.
-    -->
     <script>
-      let count = 0;
-      const button = document.getElementById("petButton");
-      const label = document.getElementById("pets");
-      button.addEventListener("click", function () {
-        count = count + 1;
-        label.textContent = "Pets given: " + count;
+      /* Scroll reveal — respects reduced motion via the CSS fallback. */
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+      document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+
+      /* Mobile menu toggle */
+      var toggle = document.getElementById("navToggle");
+      var left = document.querySelector(".nav-left");
+      toggle.addEventListener("click", function () {
+        var open = left.style.display === "flex";
+        left.style.display = open ? "" : "flex";
+        left.style.flexDirection = "column";
+      });
+
+      /* Add-to-bag counter */
+      var count = 0;
+      var bag = document.getElementById("bagCount");
+      document.querySelectorAll(".product__add").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          count += 1;
+          bag.textContent = count;
+          btn.textContent = "Aggiunto ✓";
+          setTimeout(function () { btn.textContent = "Aggiungi alla borsa"; }, 1400);
+        });
+      });
+
+      /* Newsletter */
+      document.getElementById("subscribe").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var input = ev.target.querySelector("input");
+        if (input.value && input.value.indexOf("@") > 0) {
+          ev.target.innerHTML = '<span style="font-size:0.8rem;letter-spacing:0.06em;">Grazie. Benvenuta nel club.</span>';
+        } else {
+          input.focus();
+        }
       });
     </script>
   </body>
