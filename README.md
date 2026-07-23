@@ -27,8 +27,11 @@ Double-click `index.html` to open it in your browser. Edit the text or prices in
   grey `#6f6c68` for secondary text. Fully theme-aware (light & dark).
 - **Type** — a light, wide-tracked sans for the wordmark and headings, paired
   with an italic serif for editorial statements.
-- **Imagery** — placeholder cat emblems drawn in SVG stand in for photography.
-  Swap these for real product photos when you have them.
+- **Imagery** — real cat photography (in `assets/`), rendered black-and-white
+  in CSS with `filter: grayscale(1)` so any source matches the brand. Photos are
+  from [Unsplash](https://unsplash.com) under the free Unsplash License. The
+  product grid uses a minimalist SVG cat emblem — swap in real product shots
+  when you have them.
 
 ## Making it a real shop
 
