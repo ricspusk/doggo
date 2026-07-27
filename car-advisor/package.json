@@ -1,0 +1,10 @@
+{
+  "name": "autotanacs-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AutóTanács — élő AI backend (Vercel serverless function)",
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest"
+  }
+}

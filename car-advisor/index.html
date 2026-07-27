@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutóTanács — Használtautó vásárlási segéd</title>
+    <meta
+      name="description"
+      content="Add meg egy használtautó adatait, és kapj tájékoztató kockázati elemzést és ellenőrző listát a vásárlás előtt."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar__inner">
+        <a class="brand" href="#">
+          <span class="brand__mark" aria-hidden="true">🚗</span>
+          <span class="brand__name">AutóTanács</span>
+        </a>
+        <a class="support" href="#" id="patreonBtn">☕ Támogatás</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <span class="pill" id="modePill">Demó mód</span>
+        <h1>Ne vegyél zsákbamacskát.</h1>
+        <p class="lead">
+          Add meg a kiszemelt használtautó adatait, és kapj egy áttekinthető
+          kockázati elemzést, illetve egy ellenőrző listát, mielőtt döntesz.
+          Az oldal ingyenes — később Patreonon támogathatod.
+        </p>
+      </section>
+
+      <div class="layout">
+        <!-- ŰRLAP -->
+        <section class="card form-card">
+          <h2>Az autó adatai</h2>
+          <form id="carForm">
+            <div class="grid2">
+              <label>Márka és modell
+                <input name="model" type="text" placeholder="pl. Volkswagen Golf" required />
+              </label>
+              <label>Évjárat
+                <input name="year" type="number" min="1990" max="2026" placeholder="pl. 2016" required />
+              </label>
+              <label>Futott km
+                <input name="km" type="number" min="0" placeholder="pl. 145000" required />
+              </label>
+              <label>Ár (Ft)
+                <input name="price" type="number" min="0" placeholder="pl. 3200000" required />
+              </label>
+              <label>Üzemanyag
+                <select name="fuel">
+                  <option value="benzin">Benzin</option>
+                  <option value="dízel">Dízel</option>
+                  <option value="hibrid">Hibrid</option>
+                  <option value="elektromos">Elektromos</option>
+                </select>
+              </label>
+              <label>Váltó
+                <select name="gearbox">
+                  <option value="manuális">Manuális</option>
+                  <option value="automata">Automata</option>
+                </select>
+              </label>
+            </div>
+
+            <h2 class="mt">Neked mi fontos?</h2>
+            <div class="grid2">
+              <label>Mire használnád?
+                <select name="usage">
+                  <option value="városi">Főleg városban</option>
+                  <option value="hosszútáv">Sok hosszútáv / autópálya</option>
+                  <option value="vegyes">Vegyes használat</option>
+                  <option value="család">Családi autó</option>
+                  <option value="első">Első autó / tanuló</option>
+                </select>
+              </label>
+              <label>Legfontosabb szempont
+                <select name="priority">
+                  <option value="megbízhatóság">Megbízhatóság</option>
+                  <option value="ár">Kedvező ár</option>
+                  <option value="fogyasztás">Alacsony fogyasztás</option>
+                  <option value="kényelem">Kényelem / felszereltség</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="mt">Hirdetés szövege vagy megjegyzés (opcionális)
+              <textarea name="notes" rows="3" placeholder="Ide bemásolhatod a hirdetés leírását, vagy leírhatod, mi aggaszt."></textarea>
+            </label>
+
+            <button type="submit" class="btn" id="submitBtn">Elemzés kérése</button>
+            <p class="disclaimer">
+              Tájékoztató jellegű, nem szakértői vagy műszaki vizsgálat. A végső
+              döntés előtt mindig nézesd meg az autót szakemberrel.
+            </p>
+          </form>
+        </section>
+
+        <!-- EREDMÉNY -->
+        <section class="card result-card" id="resultCard" aria-live="polite">
+          <div class="result-empty" id="resultEmpty">
+            <div class="result-empty__icon">📋</div>
+            <p>Töltsd ki az űrlapot, és itt jelenik meg az elemzés.</p>
+          </div>
+          <div class="result-body" id="resultBody" hidden></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>© 2026 AutóTanács · Ingyenes segéd használtautó-vásárláshoz · Készült tanulási céllal.</p>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
