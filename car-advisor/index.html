@@ -16,7 +16,7 @@
     />
     <!-- A ?v= verziószám miatt minden frissítéskor friss fájl töltődik be
          (különben a böngésző a régi CSS-t párosítaná az új HTML-lel). -->
-    <link rel="stylesheet" href="style.css?v=5" />
+    <link rel="stylesheet" href="style.css?v=6" />
   </head>
   <body>
     <!-- Márkajel: sebességmérő-ív (saját jel, nem másolat) -->
@@ -46,7 +46,13 @@
     <main id="top">
       <!-- ================= HERO (fotó-vezérelt) ================= -->
       <section class="hero">
-        <img class="hero__img" src="assets/hero-cluster.jpg" alt="" aria-hidden="true" />
+        <!-- A poszterkép azonnal megjelenik, a videó némán, ismétlődve indul.
+             Ha a videó nem tud lejátszani (régi eszköz, adatspórolás,
+             csökkentett mozgás), a poszter marad látható — az oldal ugyanúgy jó. -->
+        <video class="hero__img" id="heroVideo" poster="assets/hero-poster.jpg"
+               autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+          <source src="assets/hero.mp4" type="video/mp4" />
+        </video>
         <div class="hero__scrim" aria-hidden="true"></div>
         <div class="hero__sweep" aria-hidden="true"></div>
 
@@ -292,7 +298,7 @@
       </div>
     </footer>
 
-    <script src="knowledge.js?v=5"></script>
-    <script src="app.js?v=5"></script>
+    <script src="knowledge.js?v=6"></script>
+    <script src="app.js?v=6"></script>
   </body>
 </html>

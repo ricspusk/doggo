@@ -11,6 +11,19 @@
 // 👇 Ha van élő backended, ide írd a címét, pl. "https://autotanacs.vercel.app/api/analyze"
 const API_URL = "";
 
+/* ---- Hero videó: csökkentett mozgás esetén megáll, a poszter marad ---- */
+(function () {
+  const v = document.getElementById("heroVideo");
+  if (!v) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    v.removeAttribute("autoplay");
+    v.pause();
+  }
+  // Ha az autoplay-t a böngésző blokkolja, csendben maradunk a poszternél
+  const p = v.play();
+  if (p && typeof p.catch === "function") p.catch(() => {});
+})();
+
 /* ---- Topbar: a hero fölött átlátszó, alatta testet kap ---- */
 const topbar = document.getElementById("topbar");
 const heroEl = document.querySelector(".hero");
