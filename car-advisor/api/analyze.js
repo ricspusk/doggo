@@ -19,6 +19,16 @@ const client = new Anthropic(); // ANTHROPIC_API_KEY env változót automatikusa
 const JSON_SHAPE = `{
   "verdict": "rövid ítélet, pl. 'Megfontolandó vétel'",
   "riskScore": 0-100 egész (magasabb = több kockázat),
+  "forecast": [
+    {
+      "title": "pl. 'Vezérműszíj csere' vagy 'DPF eltömődés'",
+      "kind": "karbantartás vagy meghibásodás",
+      "urgency": "esedékes | hamarosan | figyeld",
+      "detail": "MIÉRT és MIKOR: konkrét km-értékkel, pl. 'a gyári terv szerint 180 000 km-nél esedékes'",
+      "estCost": "tájékoztató költség Ft-ban, tartományban",
+      "source": "forrás URL, ha fórumból/dokumentumból jön"
+    }
+  ],
   "review": "2-4 mondatos vélemény, ami a szabad szöveget is figyelembe veszi",
   "priceAssessment": "az ár értékelése (óvatosan, tartományban; ne találj ki pontos árat)",
   "knownIssues": [ { "title": "…", "detail": "…", "source": "forrás URL, ha van" } ],
@@ -39,14 +49,24 @@ export default async function handler(req, res) {
     const d = req.body || {};
 
     const system =
-      "Tapasztalt, tárgyilagos használtautó-tanácsadó vagy. " +
-      "HASZNÁLD a web_search eszközt: keress rá a konkrét márkára/modellre/évjáratra és " +
-      "gyakori kifejezésekre (pl. 'típushibák', 'common problems', 'reliability', fórumnév), " +
-      "hogy valós tulajdonosi fórumokból és megbízhatósági forrásokból gyűjts típushibákat, " +
-      "karbantartási teendőket és kockázatokat. A talált állításokat forrás-URL-lel jelöld a " +
-      "knownIssues[].source mezőben. Értelmezd a felhasználó szabad szövegét, és a 'review' " +
-      "mezőben arra is reagálj. Légy őszinte a bizonytalanságról; ne találj ki árakat vagy " +
-      "statisztikákat. A válasz nyelve magyar. Ez tájékoztatás, nem szakértői vizsgálat.\n\n" +
+      "Tapasztalt, tárgyilagos használtautó-tanácsadó vagy.\n\n" +
+      "A LEGFONTOSABB FELADATOD a 'forecast' mező: a megadott KILOMÉTERÓRA-ÁLLÁSBÓL kiindulva " +
+      "sorold fel, milyen KARBANTARTÁSOK esedékesek és milyen TIPIKUS MEGHIBÁSODÁSOK várhatók " +
+      "a vásárlás utáni következő kb. 50 000 km-ben. Legyen minél több konkrét, hasznos elem " +
+      "(cél: 6-12 tétel), mindegyiknél KM-ÉRTÉKKEL ('a szíj 180 000 km-nél esedékes'), " +
+      "sürgősséggel és tájékoztató költséggel. Ez a felhasználó fő kérdése: 'mire készüljek, " +
+      "ha ennyi km-rel megveszem?'\n\n" +
+      "HASZNÁLD a web_search eszközt: keress rá a konkrét márkára/modellre/motorra/évjáratra és " +
+      "olyan kifejezésekre, mint 'típushibák', 'common problems', 'reliability', " +
+      "'maintenance schedule', 'at 200000 km', fórumnevek. Valós tulajdonosi fórumokból és " +
+      "szervizelési tervekből gyűjts adatot. A talált állításokhoz adj forrás-URL-t " +
+      "(forecast[].source és knownIssues[].source).\n\n" +
+      "Értelmezd a felhasználó szabad szövegét, és a 'review' mezőben arra is reagálj " +
+      "(ha pl. említ egy hibát vagy egy elvégzett javítást, azt vedd figyelembe a " +
+      "kockázatban és az előrejelzésben is).\n\n" +
+      "Légy őszinte a bizonytalanságról; ne találj ki pontos árakat vagy statisztikákat — " +
+      "a költségeket tartományban add meg. A válasz nyelve magyar. Ez tájékoztatás, nem " +
+      "szakértői vizsgálat.\n\n" +
       "KIZÁRÓLAG egyetlen JSON objektumot adj vissza, pontosan ilyen szerkezettel, minden " +
       "magyarázó szöveg nélkül:\n" + JSON_SHAPE;
 

@@ -99,6 +99,17 @@ ul.checklist li::before { content: "✓"; color: var(--accent); font-weight: 800
 
 .note { font-size: 0.78rem; color: var(--muted); background: var(--field); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 16px; }
 
+/* Km-alapú előrejelzés */
+.section.highlight { background: color-mix(in srgb, var(--accent) 7%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 12px; padding: 16px; margin-top: 18px; }
+.section.highlight h3 { color: var(--ink); font-size: 0.82rem; }
+ul.forecast li.fc { display: grid; gap: 4px; background: var(--panel); }
+.fc__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.fc__head b { font-size: 0.94rem; }
+.fc__detail { color: var(--muted); font-size: 0.86rem; }
+.fc__cost { font-size: 0.82rem; font-weight: 600; color: var(--accent); }
+.hint { font-size: 0.78rem; color: var(--muted); margin: 10px 0 0; }
+.linkbtn small { display: block; font-weight: 500; font-size: 0.72rem; opacity: 0.8; }
+
 .links { display: flex; gap: 10px; flex-wrap: wrap; }
 .linkbtn { flex: 1 1 auto; text-align: center; text-decoration: none; font-weight: 700; font-size: 0.9rem;
   color: var(--accent); border: 1px solid var(--accent); border-radius: 10px; padding: 11px 14px; transition: background 0.15s ease, color 0.15s ease; }
