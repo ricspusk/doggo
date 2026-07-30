@@ -3,190 +3,289 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutóTanács — Használtautó vásárlási segéd</title>
+    <title>AutóTanács — Tudd meg, mi jön a használtautó után</title>
     <meta
       name="description"
-      content="Add meg egy használtautó adatait, és kapj tájékoztató kockázati elemzést, típushibákat és ellenőrző listát a vásárlás előtt."
+      content="Add meg a használtautó adatait, és megmutatjuk, milyen karbantartások és tipikus meghibásodások várhatók a vásárlás után a kilométeróra-állás alapján."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="wrap topbar__inner">
-        <a class="brand" href="#">
-          <span class="brand__mark" aria-hidden="true">🚗</span>
-          <span class="brand__name">AutóTanács</span>
+    <!-- Márkajel: sebességmérő-ív (saját jel, nem másolat) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="mark" viewBox="0 0 40 28">
+        <path d="M3 24a17 17 0 0 1 34 0" fill="none" stroke="currentColor"
+              stroke-width="3.4" stroke-linecap="round" />
+        <path d="M20 24 L30 11" fill="none" stroke="currentColor"
+              stroke-width="3.4" stroke-linecap="round" />
+      </symbol>
+    </svg>
+
+    <header class="topbar topbar--over" id="topbar">
+      <div class="shell topbar__inner">
+        <a class="brand" href="#top" aria-label="AutóTanács">
+          <span class="brand__mark"><svg><use href="#mark" /></svg></span>
+          <span class="brand__name">autó<em>tanács</em></span>
         </a>
-        <a class="support" href="#" id="patreonBtn">☕ Támogatás</a>
+        <nav class="nav" aria-label="Fő navigáció">
+          <a href="#elemzes">elemzés</a>
+          <a href="#hogyan">hogyan működik</a>
+        </nav>
+        <a class="btn btn--ghost btn--sm" href="#" id="patreonBtn">támogatás</a>
       </div>
     </header>
 
-    <main class="wrap">
+    <main id="top">
+      <!-- ================= HERO (fotó-vezérelt) ================= -->
       <section class="hero">
-        <span class="pill" id="modePill">Demó mód</span>
-        <h1>Ne vegyél zsákbamacskát.</h1>
-        <p class="lead">
-          Add meg a kiszemelt használtautó adatait, és kapj egy áttekinthető
-          kockázati elemzést, típushiba-listát és ellenőrző listát, mielőtt
-          döntesz. Élő AI módban valós fórumokból is kutat.
-        </p>
+        <img class="hero__img" src="assets/hero-cluster.jpg" alt="" aria-hidden="true" />
+        <div class="hero__scrim" aria-hidden="true"></div>
+
+        <div class="shell hero__inner">
+          <div class="hero__copy">
+            <h1 class="reveal" data-d="0">
+              Tudd meg,<br />mi jön <em>utána</em>
+            </h1>
+            <p class="hero__lead reveal" data-d="1">
+              a kilométeróra-állásból megmutatjuk, mire kell készülnöd a vásárlás után
+            </p>
+            <div class="hero__cta reveal" data-d="2">
+              <a class="btn btn--solid" href="#elemzes">elemzem az autót</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fül-sáv: valódi szakasz-navigáció -->
+        <nav class="tabstrip" aria-label="Szakaszok">
+          <div class="shell tabstrip__inner">
+            <a class="tab is-active" href="#elemzes">az elemzés</a>
+            <a class="tab" href="#hogyan">hogyan működik</a>
+            <span class="tab tab--fact">ingyenes, regisztráció nélkül</span>
+          </div>
+        </nav>
       </section>
 
-      <div class="layout">
-        <!-- ŰRLAP -->
-        <section class="card form-card">
-          <h2>Az autó adatai</h2>
-          <form id="carForm">
-            <div class="grid2">
-              <label class="span2">Márka és modell *
-                <input name="model" type="text" placeholder="pl. Volkswagen Golf" required
-                       autocomplete="off" list="modelHints" />
-                <datalist id="modelHints">
-                  <option>Volkswagen Golf</option>
-                  <option>Volkswagen Passat</option>
-                  <option>Volkswagen Tiguan</option>
-                  <option>Skoda Octavia</option>
-                  <option>Skoda Fabia</option>
-                  <option>Ford Focus</option>
-                  <option>Opel Astra</option>
-                  <option>Toyota Corolla</option>
-                  <option>Toyota Prius</option>
-                  <option>Toyota RAV4</option>
-                  <option>BMW 3</option>
-                  <option>BMW X3</option>
-                  <option>Audi A4</option>
-                  <option>Mercedes C</option>
-                  <option>Hyundai Tucson</option>
-                  <option>Kia Sportage</option>
-                  <option>Dacia Duster</option>
-                  <option>Suzuki Vitara</option>
-                  <option>Tesla Model 3</option>
-                  <option>Nissan Qashqai</option>
-                </datalist>
-                <span class="fieldnote" id="modelNote" hidden></span>
-              </label>
-              <label>Kivitel
-                <select name="bodyType">
-                  <option value="">—</option>
-                  <option>Ferdehátú</option>
-                  <option>Sedan / Limuzin</option>
-                  <option>Kombi</option>
-                  <option>SUV / Terepjáró</option>
-                  <option>Coupé</option>
-                  <option>Kabrió</option>
-                  <option>Egyterű</option>
-                  <option>Kisbusz</option>
-                </select>
-              </label>
-              <label>Évjárat *
-                <input name="year" type="number" min="1990" max="2026" placeholder="pl. 2016" required />
-                <span class="fieldnote err" id="yearNote" hidden></span>
-              </label>
-              <label>Futott km *
-                <input name="km" type="number" min="0" placeholder="pl. 145000" required />
-              </label>
-              <label>Ár (Ft) *
-                <input name="price" type="number" min="0" placeholder="pl. 3200000" required />
-              </label>
-              <label>Teljesítmény (LE)
-                <input name="powerHp" type="number" min="0" placeholder="pl. 110" />
-              </label>
-              <label>Üzemanyag
-                <select name="fuel">
-                  <option>Benzin</option>
-                  <option>Dízel</option>
-                  <option>Hibrid</option>
-                  <option>Elektromos</option>
-                  <option>LPG / gáz</option>
-                </select>
-              </label>
-              <label>Váltó
-                <select name="gearbox">
-                  <option>Manuális</option>
-                  <option>Automata</option>
-                </select>
-              </label>
-              <label>Hajtás
-                <select name="drivetrain">
-                  <option value="">—</option>
-                  <option>Első kerék</option>
-                  <option>Hátsó kerék</option>
-                  <option>Összkerék</option>
-                </select>
-              </label>
-              <label>Ajtók száma
-                <select name="doors">
-                  <option value="">—</option>
-                  <option>2/3</option>
-                  <option>4/5</option>
-                </select>
-              </label>
-              <label>Állapot
-                <select name="condition">
-                  <option value="">—</option>
-                  <option>Kitűnő</option>
-                  <option>Jó</option>
-                  <option>Közepes</option>
-                  <option>Felújítandó</option>
-                </select>
-              </label>
-              <label>Szervizkönyv
-                <select name="serviceBook">
-                  <option value="">—</option>
-                  <option>Van, teljes</option>
-                  <option>Részleges</option>
-                  <option>Nincs</option>
-                </select>
-              </label>
+      <!-- ================= ELEMZÉS ================= -->
+      <section class="console" id="elemzes">
+        <div class="shell">
+          <header class="sechead reveal">
+            <p class="eyebrow"><span class="eyebrow__bar"></span>Az elemzés</p>
+            <h2>Add meg az autót, <em>és megmondjuk, mire készülj.</em></h2>
+          </header>
+
+          <div class="layout">
+            <!-- ŰRLAP -->
+            <div class="panel panel--form reveal">
+              <div class="panel__head">
+                <span class="idx">01</span>
+                <h3>Az autó adatai</h3>
+                <span class="pill" id="modePill">Demó</span>
+              </div>
+
+              <form id="carForm" novalidate>
+                <div class="fields">
+                  <label class="f f--wide">
+                    <span class="f__label">Márka és modell <i>*</i></span>
+                    <input name="model" type="text" placeholder="pl. Volkswagen Golf"
+                           required autocomplete="off" list="modelHints" />
+                    <datalist id="modelHints">
+                      <option>Volkswagen Golf</option>
+                      <option>Volkswagen Passat</option>
+                      <option>Volkswagen Tiguan</option>
+                      <option>Skoda Octavia</option>
+                      <option>Skoda Fabia</option>
+                      <option>Ford Focus</option>
+                      <option>Opel Astra</option>
+                      <option>Toyota Corolla</option>
+                      <option>Toyota Prius</option>
+                      <option>Toyota RAV4</option>
+                      <option>Renault Megane</option>
+                      <option>Renault Clio</option>
+                      <option>BMW 3</option>
+                      <option>BMW X3</option>
+                      <option>Audi A4</option>
+                      <option>Hyundai Tucson</option>
+                      <option>Kia Sportage</option>
+                      <option>Dacia Duster</option>
+                      <option>Suzuki Vitara</option>
+                      <option>Tesla Model 3</option>
+                      <option>Nissan Qashqai</option>
+                    </datalist>
+                    <span class="fieldnote" id="modelNote" hidden></span>
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Évjárat <i>*</i></span>
+                    <input name="year" type="number" min="1990" max="2026" placeholder="2016" required />
+                    <span class="fieldnote err" id="yearNote" hidden></span>
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Futott km <i>*</i></span>
+                    <input name="km" type="number" min="0" placeholder="145000" required />
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Ár (Ft) <i>*</i></span>
+                    <input name="price" type="number" min="0" placeholder="3200000" required />
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Teljesítmény (LE)</span>
+                    <input name="powerHp" type="number" min="0" placeholder="110" />
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Kivitel</span>
+                    <select name="bodyType">
+                      <option value="">Mindegy</option>
+                      <option>Ferdehátú</option>
+                      <option>Sedan / Limuzin</option>
+                      <option>Kombi</option>
+                      <option>SUV / Terepjáró</option>
+                      <option>Coupé</option>
+                      <option>Kabrió</option>
+                      <option>Egyterű</option>
+                      <option>Kisbusz</option>
+                    </select>
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Üzemanyag</span>
+                    <select name="fuel">
+                      <option>Benzin</option>
+                      <option>Dízel</option>
+                      <option>Hibrid</option>
+                      <option>Elektromos</option>
+                      <option>LPG / gáz</option>
+                    </select>
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Váltó</span>
+                    <select name="gearbox">
+                      <option>Manuális</option>
+                      <option>Automata</option>
+                    </select>
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Állapot</span>
+                    <select name="condition">
+                      <option value="">Mindegy</option>
+                      <option>Kitűnő</option>
+                      <option>Jó</option>
+                      <option>Közepes</option>
+                      <option>Felújítandó</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="panel__sub">
+                  <span class="idx">02</span>
+                  <h3>Neked mi fontos?</h3>
+                </div>
+                <div class="fields">
+                  <label class="f">
+                    <span class="f__label">Mire használnád?</span>
+                    <select name="usage">
+                      <option value="városi">Főleg városban</option>
+                      <option value="hosszútáv">Sok hosszútáv</option>
+                      <option value="vegyes">Vegyes használat</option>
+                      <option value="család">Családi autó</option>
+                      <option value="első">Első autó</option>
+                    </select>
+                  </label>
+                  <label class="f">
+                    <span class="f__label">Legfontosabb szempont</span>
+                    <select name="priority">
+                      <option value="megbízhatóság">Megbízhatóság</option>
+                      <option value="ár">Kedvező ár</option>
+                      <option value="fogyasztás">Alacsony fogyasztás</option>
+                      <option value="kényelem">Kényelem</option>
+                    </select>
+                  </label>
+                  <label class="f f--wide">
+                    <span class="f__label">Amit tudsz az autóról</span>
+                    <textarea name="freeText" rows="3"
+                      placeholder="Bemásolhatod a hirdetés leírását, vagy leírhatod, mi aggaszt — pl. „egy tulajdonos, most cserélték a vezérlést, de a klíma nem hűt”."></textarea>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn--solid btn--block" id="submitBtn">
+                  Elemzés kérése
+                </button>
+                <p class="micro">
+                  Tájékoztató jellegű, nem szakértői vagy műszaki vizsgálat. Vásárlás
+                  előtt mindig nézesd meg az autót szakemberrel.
+                </p>
+              </form>
             </div>
 
-            <h2 class="mt">Neked mi fontos?</h2>
-            <div class="grid2">
-              <label>Mire használnád?
-                <select name="usage">
-                  <option value="városi">Főleg városban</option>
-                  <option value="hosszútáv">Sok hosszútáv / autópálya</option>
-                  <option value="vegyes">Vegyes használat</option>
-                  <option value="család">Családi autó</option>
-                  <option value="első">Első autó / tanuló</option>
-                </select>
-              </label>
-              <label>Legfontosabb szempont
-                <select name="priority">
-                  <option value="megbízhatóság">Megbízhatóság</option>
-                  <option value="ár">Kedvező ár</option>
-                  <option value="fogyasztás">Alacsony fogyasztás</option>
-                  <option value="kényelem">Kényelem / felszereltség</option>
-                </select>
-              </label>
+            <!-- EREDMÉNY -->
+            <div class="panel panel--result" id="resultCard" aria-live="polite" data-anchor="elorejelzes">
+              <div class="panel__head">
+                <span class="idx">03</span>
+                <h3>Az eredmény</h3>
+              </div>
+              <div class="empty" id="resultEmpty">
+                <span class="empty__mark"><svg><use href="#mark" /></svg></span>
+                <p>Töltsd ki az űrlapot — az elemzés itt jelenik meg.</p>
+              </div>
+              <div class="result-body" id="resultBody" hidden></div>
             </div>
-
-            <label class="mt">Szabad szöveg — mit tudsz az autóról? (az AI ezt értelmezi)
-              <textarea name="freeText" rows="4" placeholder="Ide bemásolhatod a hirdetés leírását, vagy szabadon leírhatod, mit tudsz és mi aggaszt: pl. „egy tulajdonos, garázsban tartott, most cserélték a vezérlést, de a klíma nem hűt rendesen…”"></textarea>
-            </label>
-
-            <button type="submit" class="btn" id="submitBtn">Elemzés kérése</button>
-            <p class="disclaimer">
-              Tájékoztató jellegű, nem szakértői vagy műszaki vizsgálat. A végső
-              döntés előtt mindig nézesd meg az autót szakemberrel.
-            </p>
-          </form>
-        </section>
-
-        <!-- EREDMÉNY -->
-        <section class="card result-card" id="resultCard" aria-live="polite">
-          <div class="result-empty" id="resultEmpty">
-            <div class="result-empty__icon">📋</div>
-            <p>Töltsd ki az űrlapot, és itt jelenik meg az elemzés.</p>
           </div>
-          <div class="result-body" id="resultBody" hidden></div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      <!-- ================= HOGYAN ================= -->
+      <section class="how" id="hogyan">
+        <div class="shell">
+          <header class="sechead reveal">
+            <p class="eyebrow"><span class="eyebrow__bar"></span>Hogyan működik</p>
+            <h2>Három lépés, <em>nulla mellébeszélés.</em></h2>
+          </header>
+          <ol class="steps">
+            <li class="step reveal" data-d="0">
+              <span class="step__n">01</span>
+              <h3>Megadod az adatokat</h3>
+              <p>Modell, évjárat, kilométeróra-állás és ár. A form tudja, mely
+                kombinációk léteznek, így nem tudsz nem létező autót megadni.</p>
+            </li>
+            <li class="step reveal" data-d="1">
+              <span class="step__n">02</span>
+              <h3>Megkapod az előrejelzést</h3>
+              <p>Milyen karbantartás esedékes és mi hibásodhat meg a következő
+                50 000 km-ben — sürgősséggel és tájékoztató költséggel.</p>
+            </li>
+            <li class="step reveal" data-d="2">
+              <span class="step__n">03</span>
+              <h3>Megnézed az élő hirdetéseket</h3>
+              <p>Egy kattintás, és a paramétereidre szűrt találatok között
+                keresgélhetsz a nagy hirdetési oldalakon.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
-      <div class="wrap">
-        <p>© 2026 AutóTanács · Ingyenes segéd használtautó-vásárláshoz · Készült tanulási céllal.</p>
+      <div class="shell footer__inner">
+        <div class="footer__brand">
+          <span class="brand__mark"><svg><use href="#mark" /></svg></span>
+          <span class="brand__name">Autó<em>Tanács</em></span>
+        </div>
+        <p class="footer__note">
+          Ingyenes segéd használtautó-vásárláshoz. Nem tárolunk hirdetési adatot —
+          a tanács a miénk, a hirdetések a piactereké.
+        </p>
+        <p class="footer__legal">© 2026 AutóTanács · Készült tanulási céllal</p>
       </div>
     </footer>
 

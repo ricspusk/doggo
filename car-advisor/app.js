@@ -11,6 +11,46 @@
 // 👇 Ha van élő backended, ide írd a címét, pl. "https://autotanacs.vercel.app/api/analyze"
 const API_URL = "";
 
+/* ---- Topbar: a hero fölött átlátszó, alatta testet kap ---- */
+const topbar = document.getElementById("topbar");
+const heroEl = document.querySelector(".hero");
+function syncTopbar() {
+  const limit = (heroEl ? heroEl.offsetHeight : 400) - 90;
+  topbar.classList.toggle("topbar--over", window.scrollY < limit);
+}
+window.addEventListener("scroll", syncTopbar, { passive: true });
+window.addEventListener("resize", syncTopbar);
+syncTopbar();
+
+/* ---- Fül-sáv: az épp látott szakaszt jelöli ---- */
+const tabs = Array.from(document.querySelectorAll("a.tab"));
+if (tabs.length) {
+  const targets = tabs
+    .map((t) => ({ tab: t, el: document.querySelector(t.getAttribute("href")) }))
+    .filter((x) => x.el);
+  const markActive = () => {
+    let current = targets[0];
+    for (const t of targets) {
+      if (t.el.getBoundingClientRect().top <= 140) current = t;
+    }
+    tabs.forEach((t) => t.classList.remove("is-active"));
+    if (current) current.tab.classList.add("is-active");
+  };
+  window.addEventListener("scroll", markActive, { passive: true });
+  markActive();
+}
+
+/* ---- Szakasz-animációk ---- */
+const io = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  },
+  { threshold: 0.12 }
+);
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
 const form = document.getElementById("carForm");
 const submitBtn = document.getElementById("submitBtn");
 const resultEmpty = document.getElementById("resultEmpty");
@@ -179,7 +219,6 @@ const selects = {
   fuel: form.elements.fuel,
   gearbox: form.elements.gearbox,
   bodyType: form.elements.bodyType,
-  drivetrain: form.elements.drivetrain,
 };
 // Az eredeti opciólistát elmentjük, hogy visszaállítható legyen
 const ORIGINAL = {};
@@ -187,7 +226,9 @@ Object.entries(selects).forEach(([k, sel]) => {
   ORIGINAL[k] = Array.from(sel.options).map((o) => o.value);
 });
 const modelNote = document.getElementById("modelNote");
-const RULE_KEYS = { fuels: "fuel", gearboxes: "gearbox", bodyTypes: "bodyType", drivetrains: "drivetrain" };
+/* A hajtás és szervizkönyv mezők kikerültek az űrlapról; a szabályokban maradó
+   `drivetrains` kulcsokat egyszerűen nem alkalmazzuk (nincs hozzá mező). */
+const RULE_KEYS = { fuels: "fuel", gearboxes: "gearbox", bodyTypes: "bodyType" };
 const FORCED = new Set(); // mely mezők értékét kényszerítette szabály
 
 function findRule(text) {
@@ -415,7 +456,6 @@ function demoAnalyze(d) {
   if (d.fuel === "Dízel" && d.usage === "városi") risk += 12;
   if (d.gearbox === "Automata" && age > 10) risk += 6;
   if (d.condition === "Közepes") risk += 8; else if (d.condition === "Felújítandó") risk += 18;
-  if (d.serviceBook === "Nincs") risk += 8;
   risk = Math.max(5, Math.min(95, risk));
 
   let verdict, tone;
@@ -574,7 +614,7 @@ function showLoading() {
   resultEmpty.hidden = true;
   resultBody.hidden = false;
   resultBody.innerHTML =
-    '<div class="spinner"><div class="spinner__dot"></div><p>Elemzés készül…</p></div>';
+    '<div class="spinner"><div class="spinner__d"></div><p>Elemzés készül…</p></div>';
 }
 
 function renderResult(a, d, isDemo) {
@@ -584,67 +624,99 @@ function renderResult(a, d, isDemo) {
   const tone = a.tone || (a.riskScore < 35 ? "good" : a.riskScore < 60 ? "warn" : "bad");
   const gaugeColor = tone === "good" ? "var(--good)" : tone === "warn" ? "var(--warn)" : "var(--bad)";
 
-  const issues = (a.knownIssues || []).map((i) => {
-    const src = i.source ? ` <a class="src" href="${esc(i.source)}" target="_blank" rel="noopener">forrás ↗</a>` : "";
-    return `<li><b>${esc(i.title)}</b><span>${esc(i.detail || "")}${src}</span></li>`;
-  }).join("");
   const maintenance = (a.maintenance || []).map((c) => `<li>${esc(c)}</li>`).join("");
   const checklist = (a.checklist || []).map((c) => `<li>${esc(c)}</li>`).join("");
+  const issues = (a.knownIssues || []).map((i) => {
+    const src = i.source ? ` <a class="src" href="${esc(i.source)}" target="_blank" rel="noopener">forrás ↗</a>` : "";
+    return `<li class="fc"><div class="fc__top"><b>${esc(i.title)}</b></div>
+      <span class="fc__detail">${esc(i.detail || "")}${src}</span></li>`;
+  }).join("");
 
   const urgClass = { "esedékes": "bad", "hamarosan": "warn", "figyeld": "good" };
   const forecast = (a.forecast || []).map((f) => `
-    <li class="fc">
-      <div class="fc__head">
+    <li class="fc" data-u="${esc(f.urgency || "figyeld")}">
+      <div class="fc__top">
         <b>${esc(f.title)}</b>
-        <span class="badge ${urgClass[f.urgency] || "good"}">${esc(f.urgency || "")}</span>
+        <span class="tag ${urgClass[f.urgency] || "good"}">${esc(f.urgency || "")}</span>
       </div>
       <span class="fc__detail">${esc(f.detail || "")}</span>
-      ${f.estCost ? `<span class="fc__cost">Tájékoztató költség: ${esc(f.estCost)}</span>` : ""}
-      ${f.source ? ` <a class="src" href="${esc(f.source)}" target="_blank" rel="noopener">forrás ↗</a>` : ""}
+      ${f.estCost ? `<span class="fc__cost">${esc(f.estCost)}</span>` : ""}
+      ${f.source ? `<a class="src" href="${esc(f.source)}" target="_blank" rel="noopener">forrás ↗</a>` : ""}
     </li>`).join("");
 
   resultBody.innerHTML = `
     <div class="verdict">
-      <div class="gauge" style="--p:${a.riskScore}; --gauge-color:${gaugeColor}">
-        <div class="gauge__inner">${a.riskScore}</div>
+      <div class="gauge" id="gauge" style="--p:0; --gc:${gaugeColor}">
+        <div class="gauge__in" id="gaugeNum">0</div>
       </div>
-      <div class="verdict__text">
+      <div>
         <div class="v-label">${esc(a.verdict)}</div>
-        <div class="v-sub">Kockázati pont: ${a.riskScore}/100 (magasabb = több kockázat)</div>
+        <div class="v-sub">Kockázati pont ${a.riskScore}/100 — magasabb = több kockázat</div>
       </div>
     </div>
 
-    <div class="section"><h3>Összegzés</h3><p>${esc(a.summary)}</p></div>
+    <div class="block"><h4>Összegzés</h4><p>${esc(a.summary)}</p></div>
 
-    ${forecast ? `<div class="section highlight">
-      <h3>⏱️ Mi jön a vásárlás után? — ${d.km.toLocaleString("hu-HU")} km-től a következő 50 000 km-ben</h3>
-      <ul class="issues forecast">${forecast}</ul>
-      <p class="hint">Csak a döntést érdemben befolyásoló tételek. A rutin fogyóeszközöket (olajcsere, szűrők, fékbetét, gyertya, folyadékok) szándékosan nem listázzuk.</p>
+    ${forecast ? `<div class="block--key">
+      <h4 style="display:flex;align-items:center;gap:11px;margin:0 0 6px;font-size:0.71rem;
+                 font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:var(--smoke)">
+        Mi jön a vásárlás után?
+      </h4>
+      <p style="font-size:0.86rem;color:var(--smoke);margin:0 0 16px">
+        ${d.km.toLocaleString("hu-HU")} km-től a következő 50 000 km-ben
+      </p>
+      <ul class="fclist">${forecast}</ul>
+      <p class="micro">Csak a döntést érdemben befolyásoló tételek — a rutin fogyóeszközöket
+        (olajcsere, szűrők, fék, gyertya, folyadékok) szándékosan nem listázzuk.</p>
     </div>` : ""}
 
-    ${a.review ? `<div class="section"><h3>Vélemény</h3><p>${esc(a.review)}</p></div>` : ""}
+    ${a.review ? `<div class="block"><h4>Vélemény</h4><p>${esc(a.review)}</p></div>` : ""}
 
-    <div class="section"><h3>Ár értékelése</h3><p>${esc(a.priceAssessment)}</p></div>
+    <div class="block"><h4>Ár értékelése</h4><p>${esc(a.priceAssessment)}</p></div>
 
-    <div class="section"><h3>Ismert típushibák${isDemo ? " (általános)" : " (fórumokból)"}</h3><ul class="issues">${issues}</ul></div>
+    <div class="block"><h4>Ismert típushibák${isDemo ? " · általános" : " · fórumokból"}</h4>
+      <ul class="fclist">${issues}</ul></div>
 
-    ${maintenance ? `<div class="section"><h3>Karbantartási ajánlások</h3><ul class="checklist">${maintenance}</ul></div>` : ""}
+    ${maintenance ? `<div class="block"><h4>Karbantartási ajánlások</h4>
+      <ul class="plainlist">${maintenance}</ul></div>` : ""}
 
-    <div class="section"><h3>Illeszkedés az igényeidhez</h3><p>${esc(a.fitForNeeds)}</p></div>
+    <div class="block"><h4>Illeszkedés az igényeidhez</h4><p>${esc(a.fitForNeeds)}</p></div>
 
-    <div class="section"><h3>Ellenőrző lista vásárlás előtt</h3><ul class="checklist">${checklist}</ul></div>
+    <div class="block"><h4>Ellenőrző lista vásárlás előtt</h4>
+      <ul class="plainlist">${checklist}</ul></div>
 
-    <div class="section"><h3>Nézd meg az élő hirdetéseket</h3>
+    <div class="block"><h4>Élő hirdetések</h4>
       <div class="links">
-        <a class="linkbtn" href="${esc(mobiledeUrl(d))}" target="_blank" rel="noopener">mobile.de → <small>szűrve</small></a>
-        <a class="linkbtn" href="${esc(hasznaltautoUrl(d))}" target="_blank" rel="noopener">hasznaltauto.hu → <small>márka/modell</small></a>
+        <a class="linkbtn" href="${esc(mobiledeUrl(d))}" target="_blank" rel="noopener">
+          <span>mobile.de</span><small>szűrve</small></a>
+        <a class="linkbtn" href="${esc(hasznaltautoUrl(d))}" target="_blank" rel="noopener">
+          <span>hasznaltauto.hu</span><small>márka / modell</small></a>
       </div>
-      <p class="hint">A mobile.de link évjáratra, üzemanyagra, km-re és váltóra is szűr. A hasznaltauto.hu a szűrőket kódolt linkbe rejti, ezért ott a modell-listára viszünk — az évjáratot/üzemanyagot egy kattintással beállíthatod az oldalon.</p>
+      <p class="micro">A mobile.de link évjáratra, üzemanyagra, km-re és váltóra is szűr.
+        A hasznaltauto.hu a szűrőket kódolt linkbe rejti, ezért ott a modell-listára viszünk.</p>
     </div>
 
-    ${isDemo ? '<div class="note">⚠️ Ez DEMÓ elemzés — a böngésző számolta. Az éles AI verzió a szabad szöveget értelmezi, valós fórumokból kutat modell-specifikus típushibákat, karbantartási ajánlásokat és kockázatokat (forrás-linkekkel). Lásd a README-t a bekapcsoláshoz.</div>' : ""}
+    ${isDemo ? '<div class="note">Ez DEMÓ elemzés — a böngésző számolta. Az éles AI verzió a szabad szöveget értelmezi, és valós fórumokból kutat modell-specifikus típushibákat, karbantartási ajánlásokat és kockázatokat, forrás-linkekkel.</div>' : ""}
   `;
-  resultBody.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  // A mérőóra felszámol a végértékig
+  const g = document.getElementById("gauge");
+  const gn = document.getElementById("gaugeNum");
+  const target = a.riskScore;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) {
+    g.style.setProperty("--p", target); gn.textContent = target;
+  } else {
+    const t0 = performance.now(), dur = 900;
+    const step = (now) => {
+      const k = Math.min((now - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - k, 3);
+      const v = Math.round(target * eased);
+      g.style.setProperty("--p", v); gn.textContent = v;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
 }
 
 function renderError(err) {

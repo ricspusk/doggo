@@ -1,132 +1,375 @@
 /* ============================================================
-   AutóTanács — used-car buying advisor (utilitarian, trustworthy)
+   AutóTanács — design system
+   Irány: MONOKRÓM. Mélyfekete, fehér és meleg szürkék; a karaktert a
+   geometrikus grotesque tipográfia, a nagy méretkontraszt, a levegő,
+   a hajszálvonalak és a finom mozgások adják — nem a szín.
+   Színt kizárólag ott használunk, ahol ADATOT jelent: a kockázati
+   szint és a sürgősség jelölésére.
    ============================================================ */
+
+/* ---------- Tokenek ---------- */
 :root {
-  --bg: #eef1f5;
-  --panel: #ffffff;
-  --ink: #16202b;
-  --muted: #5d6b78;
-  --line: #dce2e9;
-  --field: #f6f8fa;
-  --accent: #0f766e;         /* teal — trust / verify */
-  --accent-ink: #ffffff;
-  --good: #15803d;
-  --warn: #b45309;
+  --ink: #0b0b0c;          /* mélyfekete */
+  --paper: #ffffff;
+  --wash: #f5f4f1;         /* meleg törtfehér felület */
+  --line: #e4e2dc;         /* hajszálvonal */
+  --line-strong: #c9c6bd;
+  --smoke: #6f6c64;        /* meleg szürke, nem gyári grey */
+  --hush: #9b978d;         /* halkabb szürke */
+
+  /* Szemantikus színek — csak adatjelölésre */
+  --good: #1d6f55;
+  --warn: #b5540d;
   --bad: #b91c1c;
-  --shadow: 0 6px 24px rgba(22, 32, 43, 0.08);
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --shell: 1240px;
+  --pad: clamp(20px, 5vw, 56px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --sans: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0e141b; --panel: #161f29; --ink: #e7edf3; --muted: #97a4b1;
-    --line: #263241; --field: #1c2733; --accent: #2dd4bf; --accent-ink: #06231f;
-    --good: #4ade80; --warn: #fbbf24; --bad: #f87171;
-    --shadow: 0 8px 30px rgba(0,0,0,0.4);
+    --ink: #f3f2ee; --paper: #0e0e0f; --wash: #17171a; --line: #292930;
+    --line-strong: #3b3b44; --smoke: #a09c92; --hush: #757168;
+    --good: #34d399; --warn: #fb923c; --bad: #f87171;
   }
 }
+:root[data-theme="light"] {
+  --ink: #0b0b0c; --paper: #ffffff; --wash: #f5f4f1; --line: #e4e2dc;
+  --line-strong: #c9c6bd; --smoke: #6f6c64; --hush: #9b978d;
+  --good: #1d6f55; --warn: #b5540d; --bad: #b91c1c;
+}
+:root[data-theme="dark"] {
+  --ink: #f3f2ee; --paper: #0e0e0f; --wash: #17171a; --line: #292930;
+  --line-strong: #3b3b44; --smoke: #a09c92; --hush: #757168;
+  --good: #34d399; --warn: #fb923c; --bad: #f87171;
+}
+
+/* ---------- Alap ---------- */
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.55; }
-.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
-
-/* Topbar */
-.topbar { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
-.topbar__inner { display: flex; align-items: center; justify-content: space-between; padding-block: 14px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 700; }
-.brand__mark { font-size: 1.5rem; }
-.brand__name { letter-spacing: -0.01em; }
-.support { text-decoration: none; color: var(--accent); font-weight: 600; border: 1px solid var(--accent); padding: 7px 14px; border-radius: 999px; font-size: 0.9rem; }
-.support:hover { background: var(--accent); color: var(--accent-ink); }
-
-/* Hero */
-.hero { padding-block: 40px 20px; max-width: 640px; }
-.pill { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); padding: 4px 12px; border-radius: 999px; }
-.hero h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); margin: 14px 0 8px; letter-spacing: -0.02em; }
-.lead { color: var(--muted); margin: 0; font-size: 1.05rem; }
-
-/* Layout */
-.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; padding-bottom: 60px; }
-@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
-
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px; box-shadow: var(--shadow); }
-.card h2 { font-size: 1.1rem; margin: 0 0 16px; }
-.card h2.mt { margin-top: 26px; }
-
-/* Form */
-form label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-form .mt { margin-top: 18px; }
-input, select, textarea {
-  width: 100%; margin-top: 5px; padding: 11px 12px; font: inherit; color: var(--ink);
-  background: var(--field); border: 1px solid var(--line); border-radius: 10px; outline: none;
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
-input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.grid2 .span2 { grid-column: 1 / -1; }
-.fieldnote { display: block; margin-top: 6px; font-size: 0.78rem; font-weight: 500; color: var(--accent); line-height: 1.4; }
-.fieldnote.err { color: var(--bad); }
-select.locked { background: color-mix(in srgb, var(--accent) 10%, var(--field)); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); cursor: not-allowed; opacity: 1; }
-select:disabled { color: var(--ink); }
-@media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+.shell { max-width: var(--shell); margin-inline: auto; padding-inline: var(--pad); }
+/* A fix navigáció ne takarja el a szakasz tetejét ugrásnál */
+section[id], .panel[data-anchor] { scroll-margin-top: 84px; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3 { margin: 0; letter-spacing: -0.038em; line-height: 0.97; font-weight: 900; }
+em { font-style: normal; }
+/* Kéthangú főcím: a kiemelt rész halkabb — kontraszt szín nélkül */
+h1 em, h2 em, h3 em { color: var(--hush); }
+
+/* Kis nagybetűs felirat rövid vonallal — a rendszer visszatérő jele */
+.eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--smoke); margin: 0 0 18px;
+}
+.eyebrow__bar { display: block; width: 28px; height: 2px; background: var(--ink); flex: none; }
+
+/* ---------- Gombok ---------- */
 .btn {
-  width: 100%; margin-top: 22px; padding: 14px; font: inherit; font-weight: 700;
-  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 11px; cursor: pointer;
-  transition: filter 0.15s ease;
+  --h: 54px;
+  display: inline-flex; align-items: center; justify-content: center;
+  height: var(--h); padding: 0 30px; border: 1.5px solid transparent; border-radius: 2px;
+  font: inherit; font-weight: 800; font-size: 0.92rem; white-space: nowrap;
+  cursor: pointer; transition: transform 0.18s var(--ease), background 0.18s var(--ease),
+    color 0.18s var(--ease), border-color 0.18s var(--ease), opacity 0.18s var(--ease);
 }
-.btn:hover { filter: brightness(1.06); }
-.btn:disabled { opacity: 0.6; cursor: progress; }
-.disclaimer { font-size: 0.78rem; color: var(--muted); margin: 14px 0 0; }
+.btn--sm { --h: 40px; padding: 0 18px; font-size: 0.8rem; }
+.btn--block { width: 100%; margin-top: 26px; }
+.btn--solid { background: var(--ink); color: var(--paper); }
+.btn--solid:hover { transform: translateY(-2px); opacity: 0.88; }
+.btn--outline { border-color: rgba(255, 255, 255, 0.45); color: #fff; }
+.btn--outline:hover { background: #fff; color: #0b0b0c; border-color: #fff; }
+.btn--ghost { border-color: var(--line-strong); color: var(--ink); }
+.btn--ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn:disabled { opacity: 0.5; cursor: progress; transform: none; }
 
-/* Result */
-.result-card { min-height: 320px; }
-.result-empty { display: grid; place-content: center; text-align: center; color: var(--muted); min-height: 280px; gap: 8px; }
-.result-empty__icon { font-size: 2.4rem; }
+/* ---------- Topbar: átlátszóan ül a hero fotón, görgetéskor testet kap ---------- */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease),
+    color 0.3s var(--ease), backdrop-filter 0.3s var(--ease);
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+/* A hero fölött: nincs háttér, fehér szöveg */
+.topbar--over {
+  background: transparent; backdrop-filter: none;
+  border-bottom-color: transparent; color: #fff;
+}
+.topbar__inner { display: flex; align-items: center; gap: 30px; padding-block: 16px; }
+.brand { display: flex; align-items: center; gap: 11px; margin-right: auto; }
+.brand__mark { width: 34px; height: 24px; color: currentColor; flex: none; }
+.brand__mark svg { width: 100%; height: 100%; display: block; }
+.brand__name { font-weight: 900; font-size: 1.1rem; letter-spacing: -0.03em; }
+.brand__name em { color: var(--hush); }
+.topbar--over .brand__name em { color: rgba(255, 255, 255, 0.55); }
+.nav { display: flex; gap: 28px; }
+.nav a { position: relative; font-size: 0.88rem; font-weight: 700; padding-block: 4px; }
+.nav a::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+  background: currentColor; transition: width 0.3s var(--ease);
+}
+.nav a:hover::after { width: 100%; }
+.topbar--over .btn--ghost { border-color: rgba(255, 255, 255, 0.5); color: #fff; }
+.topbar--over .btn--ghost:hover { background: #fff; color: #0b0b0c; border-color: #fff; }
+@media (max-width: 760px) { .nav { display: none; } }
 
-.verdict { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
-.gauge { --p: 0; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; flex: none;
-  background: conic-gradient(var(--gauge-color) calc(var(--p) * 1%), var(--line) 0); }
-.gauge__inner { width: 64px; height: 64px; border-radius: 50%; background: var(--panel); display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; }
-.verdict__text .v-label { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
-.verdict__text .v-sub { color: var(--muted); font-size: 0.9rem; }
+/* ---------- HERO: a fotó adja a hangulatot, az UI monokróm ---------- */
+.hero {
+  position: relative; min-height: min(88vh, 800px);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  background: #0b0b0c; color: #fff; overflow: hidden;
+  padding-top: 110px;
+}
+.hero__img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 62% 45%;
+  transform: scale(1.06); animation: heroZoom 14s var(--ease) forwards;
+}
+@keyframes heroZoom { to { transform: scale(1); } }
+/* Sötét fátyol balra, hogy a fehér szöveg mindig olvasható legyen */
+.hero__scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(6, 6, 7, 0.9) 0%, rgba(6, 6, 7, 0.62) 42%, rgba(6, 6, 7, 0.2) 78%),
+    linear-gradient(180deg, rgba(6, 6, 7, 0.55) 0%, transparent 30%, rgba(6, 6, 7, 0.72) 100%);
+}
+.hero__inner { position: relative; padding-bottom: clamp(34px, 6vw, 70px); width: 100%; }
+.hero__copy { max-width: min(780px, 64%); }
+@media (max-width: 860px) { .hero__copy { max-width: 100%; } }
+.hero h1 {
+  font-size: clamp(2.4rem, 7.4vw, 5.6rem);
+  text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.94;
+  margin-bottom: 20px;
+}
+.hero h1 em { color: rgba(255, 255, 255, 0.44); }
+.hero__lead {
+  max-width: 40ch; color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(0.98rem, 1.5vw, 1.14rem); font-weight: 600; margin: 0 0 30px;
+}
+.hero__cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero .btn--solid { background: #fff; color: #0b0b0c; }
+.hero .btn--solid:hover { background: rgba(255, 255, 255, 0.86); opacity: 1; }
 
-.section { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
-.section h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; }
-.section p { margin: 0; }
-.badge { display: inline-block; font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
-.badge.good { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
-.badge.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
-.badge.bad  { color: var(--bad);  background: color-mix(in srgb, var(--bad) 14%, transparent); }
+/* Fül-sáv a hero alján — hajszálvékony elválasztók, aláhúzott aktív elem */
+.tabstrip { position: relative; border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.tabstrip__inner { display: flex; overflow-x: auto; scrollbar-width: none; }
+.tabstrip__inner::-webkit-scrollbar { display: none; }
+.tab {
+  position: relative; flex: none; padding: 18px 26px 18px 0; margin-right: 26px;
+  font-size: 0.76rem; font-weight: 800; letter-spacing: 0.11em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58); white-space: nowrap;
+  transition: color 0.25s var(--ease);
+}
+.tab + .tab, .tab + .tab--fact { border-left: 1px solid rgba(255, 255, 255, 0.18); padding-left: 26px; }
+.tab::before {
+  content: ""; position: absolute; top: -1px; left: 0; right: 26px; height: 2px;
+  background: #fff; transform: scaleX(0); transform-origin: left;
+  transition: transform 0.3s var(--ease);
+}
+.tab.is-active { color: #fff; }
+.tab.is-active::before, a.tab:hover::before { transform: scaleX(1); }
+.tab--fact { color: rgba(255, 255, 255, 0.42); cursor: default; }
+.tab--fact::before { display: none; }
 
-ul.issues, ul.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-ul.issues li { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
-ul.issues li b { display: block; font-size: 0.92rem; }
-ul.issues li span { color: var(--muted); font-size: 0.86rem; }
-ul.checklist li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.92rem; }
-ul.checklist li::before { content: "✓"; color: var(--accent); font-weight: 800; flex: none; }
+/* ---------- Szekciófejek ---------- */
+.sechead { margin-bottom: clamp(34px, 5vw, 56px); max-width: 26ch; }
+.sechead h2 { font-size: clamp(1.8rem, 4.4vw, 3.2rem); text-wrap: balance; }
 
-.note { font-size: 0.78rem; color: var(--muted); background: var(--field); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 16px; }
+/* ---------- Konzol (form + eredmény) ---------- */
+.console { background: var(--wash); padding-block: clamp(56px, 9vw, 106px); }
+.layout { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(18px, 2.4vw, 26px); align-items: start; }
+@media (max-width: 940px) { .layout { grid-template-columns: 1fr; } }
 
-/* Km-alapú előrejelzés */
-.section.highlight { background: color-mix(in srgb, var(--accent) 7%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 12px; padding: 16px; margin-top: 18px; }
-.section.highlight h3 { color: var(--ink); font-size: 0.82rem; }
-ul.forecast li.fc { display: grid; gap: 4px; background: var(--panel); }
-.fc__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.fc__head b { font-size: 0.94rem; }
-.fc__detail { color: var(--muted); font-size: 0.86rem; }
-.fc__cost { font-size: 0.82rem; font-weight: 600; color: var(--accent); }
-.hint { font-size: 0.78rem; color: var(--muted); margin: 10px 0 0; }
-.linkbtn small { display: block; font-weight: 500; font-size: 0.72rem; opacity: 0.8; }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+.panel--result { position: sticky; top: 84px; }
+@media (max-width: 940px) { .panel--result { position: static; } }
+.panel__head, .panel__sub {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px clamp(20px, 3vw, 30px);
+  border-bottom: 1px solid var(--line);
+}
+.panel__sub { border-top: 1px solid var(--line); margin-top: 4px; }
+.panel__head h3, .panel__sub h3 { font-size: 1.02rem; margin-right: auto; }
+.idx {
+  font-size: 0.7rem; font-weight: 900; letter-spacing: 0.06em;
+  color: var(--paper); background: var(--ink); padding: 4px 9px; border-radius: 2px; flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.pill {
+  font-size: 0.64rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--smoke); border: 1px solid var(--line-strong); padding: 4px 10px; border-radius: 999px;
+}
 
-.links { display: flex; gap: 10px; flex-wrap: wrap; }
-.linkbtn { flex: 1 1 auto; text-align: center; text-decoration: none; font-weight: 700; font-size: 0.9rem;
-  color: var(--accent); border: 1px solid var(--accent); border-radius: 10px; padding: 11px 14px; transition: background 0.15s ease, color 0.15s ease; }
-.linkbtn:hover { background: var(--accent); color: var(--accent-ink); }
-.src { font-size: 0.8rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
-.src:hover { text-decoration: underline; }
+/* ---------- Form ---------- */
+form { padding: clamp(20px, 3vw, 30px); }
+.panel__sub + .fields { padding-top: 4px; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 520px) { .fields { grid-template-columns: 1fr; } }
+.f { display: block; }
+.f--wide { grid-column: 1 / -1; }
+.f__label {
+  display: block; font-size: 0.71rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--smoke); margin-bottom: 7px;
+}
+.f__label i { color: var(--ink); font-style: normal; }
+input, select, textarea {
+  width: 100%; padding: 13px 14px; font: inherit; font-weight: 600; color: var(--ink);
+  background: var(--wash); border: 1px solid var(--line); border-radius: 2px; outline: none;
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), background 0.18s var(--ease);
+}
+textarea { font-weight: 500; resize: vertical; }
+input::placeholder, textarea::placeholder { color: var(--hush); font-weight: 500; }
+input:focus, select:focus, textarea:focus {
+  background: var(--paper); border-color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+select { appearance: none; background-image:
+  linear-gradient(45deg, transparent 50%, var(--smoke) 50%),
+  linear-gradient(135deg, var(--smoke) 50%, transparent 50%);
+  background-position: right 18px center, right 13px center;
+  background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 34px; }
+/* Zárolt mező: a modellnél csak egy lehetőség létezik */
+select.locked {
+  background-color: var(--paper); border-color: var(--ink);
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+.fieldnote { display: block; margin-top: 7px; font-size: 0.76rem; font-weight: 600;
+  line-height: 1.45; color: var(--smoke); }
+.fieldnote.err { color: var(--bad); }
+.micro { font-size: 0.73rem; color: var(--smoke); margin: 14px 0 0; line-height: 1.5; }
 
-.spinner { display: grid; place-items: center; min-height: 280px; color: var(--muted); gap: 12px; }
-.spinner__dot { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+/* ---------- Eredmény ---------- */
+.empty { display: grid; place-content: center; justify-items: center; gap: 14px;
+  min-height: 300px; padding: 30px; text-align: center; color: var(--smoke); }
+.empty__mark { width: 54px; height: 38px; color: var(--line-strong); }
+.empty__mark svg { width: 100%; height: 100%; }
+.empty p { margin: 0; font-size: 0.9rem; font-weight: 600; max-width: 24ch; }
+.result-body { padding: clamp(20px, 3vw, 30px); }
+
+/* Verdikt + mérőóra (itt a szín ADAT: kockázati szint) */
+.verdict { display: flex; align-items: center; gap: 20px; }
+.gauge { --p: 0; width: 92px; height: 92px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  background: conic-gradient(var(--gc) calc(var(--p) * 1%), var(--line) 0);
+  transition: background 1s var(--ease); }
+.gauge__in { width: 70px; height: 70px; border-radius: 50%; background: var(--paper);
+  display: grid; place-items: center; font-weight: 900; font-size: 1.5rem;
+  letter-spacing: -0.045em; font-variant-numeric: tabular-nums; }
+.v-label { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.035em; line-height: 1.1; }
+.v-sub { font-size: 0.78rem; color: var(--smoke); margin-top: 4px; font-weight: 600; }
+
+.block { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.block > h4 {
+  display: flex; align-items: center; gap: 11px; margin: 0 0 14px;
+  font-size: 0.71rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--smoke);
+}
+.block > h4::before { content: ""; width: 18px; height: 2px; background: var(--ink); flex: none; }
+.block p { margin: 0; font-size: 0.94rem; }
+.block--key { background: var(--wash); border: 1px solid var(--line); border-radius: 3px;
+  padding: 22px; margin-top: 26px; }
+
+/* Előrejelzés-tile-ok: a sürgősséget bal oldali sáv kódolja (adat = szín) */
+.fclist, .plainlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fc {
+  position: relative; background: var(--paper); border: 1px solid var(--line);
+  border-radius: 3px; padding: 15px 17px 15px 21px; display: grid; gap: 5px;
+  transition: transform 0.22s var(--ease), box-shadow 0.22s var(--ease), border-color 0.22s var(--ease);
+}
+.fc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--line-strong); }
+.fc[data-u="esedékes"]::before { background: var(--bad); }
+.fc[data-u="hamarosan"]::before { background: var(--warn); }
+.fc[data-u="figyeld"]::before { background: var(--good); }
+.fc:hover { transform: translateX(3px); border-color: var(--line-strong);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06); }
+.fc__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fc__top b { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.015em; }
+.fc__detail { font-size: 0.85rem; color: var(--smoke); }
+.fc__cost { font-size: 0.82rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tag { font-size: 0.61rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 2px; flex: none; white-space: nowrap;
+  border: 1px solid currentColor; }
+.tag.bad { color: var(--bad); }
+.tag.warn { color: var(--warn); }
+.tag.good { color: var(--good); }
+
+.plainlist li { display: flex; gap: 12px; font-size: 0.9rem; align-items: flex-start; }
+.plainlist li::before { content: ""; width: 10px; height: 2px; background: var(--ink);
+  margin-top: 11px; flex: none; }
+.src { font-size: 0.78rem; font-weight: 700; color: var(--smoke); text-decoration: underline;
+  text-underline-offset: 3px; }
+.src:hover { color: var(--ink); }
+
+.links { display: grid; gap: 10px; }
+.linkbtn {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 15px 18px; border: 1.5px solid var(--ink); border-radius: 2px;
+  font-weight: 800; font-size: 0.9rem;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.linkbtn small { font-weight: 600; font-size: 0.68rem; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--smoke); }
+.linkbtn:hover { background: var(--ink); color: var(--paper); transform: translateY(-2px); }
+.linkbtn:hover small { color: var(--paper); opacity: 0.62; }
+.note { font-size: 0.76rem; color: var(--smoke); background: var(--wash);
+  border-left: 3px solid var(--ink); padding: 13px 15px; margin-top: 22px; line-height: 1.55; }
+
+.spinner { display: grid; place-content: center; justify-items: center; gap: 16px;
+  min-height: 300px; color: var(--smoke); font-weight: 700; font-size: 0.88rem; }
+.spinner__d { width: 40px; height: 40px; border: 3px solid var(--line);
+  border-top-color: var(--ink); border-radius: 50%; animation: spin 0.75s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .spinner__dot { animation: none; } }
 
-/* Footer */
-.site-footer { border-top: 1px solid var(--line); background: var(--panel); }
-.site-footer p { color: var(--muted); font-size: 0.82rem; text-align: center; padding-block: 20px; margin: 0; }
+/* ---------- Hogyan működik ---------- */
+.how { padding-block: clamp(56px, 9vw, 106px); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid;
+  grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 2.5vw, 32px); }
+@media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+.step { border-top: 2px solid var(--line-strong); padding-top: 20px;
+  transition: border-color 0.25s var(--ease); }
+.step:hover { border-color: var(--ink); }
+.step__n { display: block; font-size: 0.74rem; font-weight: 900; letter-spacing: 0.18em;
+  color: var(--hush); margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+.step h3 { font-size: 1.2rem; margin-bottom: 9px; }
+.step p { margin: 0; color: var(--smoke); font-size: 0.92rem; }
+
+/* ---------- Footer ---------- */
+.site-footer { background: #0b0b0c; color: #fff; padding-block: clamp(44px, 6vw, 72px); }
+.footer__inner { display: grid; gap: 16px; }
+.footer__brand { display: flex; align-items: center; gap: 11px; }
+.footer__brand .brand__name { color: #fff; }
+.footer__brand .brand__name em { color: rgba(255, 255, 255, 0.45); }
+.footer__note { max-width: 46ch; color: rgba(255, 255, 255, 0.62); font-size: 0.9rem; margin: 0; }
+.footer__legal { color: rgba(255, 255, 255, 0.34); font-size: 0.74rem; margin: 0;
+  letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ---------- Mozgás ---------- */
+.reveal { opacity: 0; transform: translateY(26px); }
+.reveal.in { opacity: 1; transform: none;
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal[data-d="1"].in { transition-delay: 0.08s; }
+.reveal[data-d="2"].in { transition-delay: 0.16s; }
+.reveal[data-d="3"].in { transition-delay: 0.24s; }
+.reveal[data-d="4"].in { transition-delay: 0.32s; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .reveal { opacity: 1; transform: none; }
+  .hero__rails span { transform: none; }
+}
+:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
