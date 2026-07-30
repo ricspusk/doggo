@@ -6,7 +6,7 @@
     <title>AutóTanács — Használtautó vásárlási segéd</title>
     <meta
       name="description"
-      content="Add meg egy használtautó adatait, és kapj tájékoztató kockázati elemzést és ellenőrző listát a vásárlás előtt."
+      content="Add meg egy használtautó adatait, és kapj tájékoztató kockázati elemzést, típushibákat és ellenőrző listát a vásárlás előtt."
     />
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -27,8 +27,8 @@
         <h1>Ne vegyél zsákbamacskát.</h1>
         <p class="lead">
           Add meg a kiszemelt használtautó adatait, és kapj egy áttekinthető
-          kockázati elemzést, illetve egy ellenőrző listát, mielőtt döntesz.
-          Az oldal ingyenes — később Patreonon támogathatod.
+          kockázati elemzést, típushiba-listát és ellenőrző listát, mielőtt
+          döntesz. Élő AI módban valós fórumokból is kutat.
         </p>
       </section>
 
@@ -38,30 +38,79 @@
           <h2>Az autó adatai</h2>
           <form id="carForm">
             <div class="grid2">
-              <label>Márka és modell
+              <label>Márka és modell *
                 <input name="model" type="text" placeholder="pl. Volkswagen Golf" required />
               </label>
-              <label>Évjárat
+              <label>Kivitel
+                <select name="bodyType">
+                  <option value="">—</option>
+                  <option>Ferdehátú</option>
+                  <option>Sedan / Limuzin</option>
+                  <option>Kombi</option>
+                  <option>SUV / Terepjáró</option>
+                  <option>Coupé</option>
+                  <option>Kabrió</option>
+                  <option>Egyterű</option>
+                  <option>Kisbusz</option>
+                </select>
+              </label>
+              <label>Évjárat *
                 <input name="year" type="number" min="1990" max="2026" placeholder="pl. 2016" required />
               </label>
-              <label>Futott km
+              <label>Futott km *
                 <input name="km" type="number" min="0" placeholder="pl. 145000" required />
               </label>
-              <label>Ár (Ft)
+              <label>Ár (Ft) *
                 <input name="price" type="number" min="0" placeholder="pl. 3200000" required />
+              </label>
+              <label>Teljesítmény (LE)
+                <input name="powerHp" type="number" min="0" placeholder="pl. 110" />
               </label>
               <label>Üzemanyag
                 <select name="fuel">
-                  <option value="benzin">Benzin</option>
-                  <option value="dízel">Dízel</option>
-                  <option value="hibrid">Hibrid</option>
-                  <option value="elektromos">Elektromos</option>
+                  <option>Benzin</option>
+                  <option>Dízel</option>
+                  <option>Hibrid</option>
+                  <option>Elektromos</option>
+                  <option>LPG / gáz</option>
                 </select>
               </label>
               <label>Váltó
                 <select name="gearbox">
-                  <option value="manuális">Manuális</option>
-                  <option value="automata">Automata</option>
+                  <option>Manuális</option>
+                  <option>Automata</option>
+                </select>
+              </label>
+              <label>Hajtás
+                <select name="drivetrain">
+                  <option value="">—</option>
+                  <option>Első kerék</option>
+                  <option>Hátsó kerék</option>
+                  <option>Összkerék</option>
+                </select>
+              </label>
+              <label>Ajtók száma
+                <select name="doors">
+                  <option value="">—</option>
+                  <option>2/3</option>
+                  <option>4/5</option>
+                </select>
+              </label>
+              <label>Állapot
+                <select name="condition">
+                  <option value="">—</option>
+                  <option>Kitűnő</option>
+                  <option>Jó</option>
+                  <option>Közepes</option>
+                  <option>Felújítandó</option>
+                </select>
+              </label>
+              <label>Szervizkönyv
+                <select name="serviceBook">
+                  <option value="">—</option>
+                  <option>Van, teljes</option>
+                  <option>Részleges</option>
+                  <option>Nincs</option>
                 </select>
               </label>
             </div>
@@ -87,8 +136,8 @@
               </label>
             </div>
 
-            <label class="mt">Hirdetés szövege vagy megjegyzés (opcionális)
-              <textarea name="notes" rows="3" placeholder="Ide bemásolhatod a hirdetés leírását, vagy leírhatod, mi aggaszt."></textarea>
+            <label class="mt">Szabad szöveg — mit tudsz az autóról? (az AI ezt értelmezi)
+              <textarea name="freeText" rows="4" placeholder="Ide bemásolhatod a hirdetés leírását, vagy szabadon leírhatod, mit tudsz és mi aggaszt: pl. „egy tulajdonos, garázsban tartott, most cserélték a vezérlést, de a klíma nem hűt rendesen…”"></textarea>
             </label>
 
             <button type="submit" class="btn" id="submitBtn">Elemzés kérése</button>

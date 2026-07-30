@@ -8,8 +8,14 @@ Patreonon támogatható, első körben ingyenes.
 
 | Mód | Mit csinál | Kell hozzá |
 | --- | ---------- | ---------- |
-| **Demó** (alapértelmezett) | A böngésző számol egy őszinte, heurisztikus elemzést a megadott adatokból. Azonnal működik. | Semmi — ingyen fut GitHub Pages-en. |
-| **Élő AI** | A valódi Claude AI ad modell-specifikus típushibákat és részletes ár-értékelést. | Anthropic API-kulcs + Vercel (lásd lent). |
+| **Demó** (alapértelmezett) | A böngésző számol egy őszinte, heurisztikus kockázati elemzést + ellenőrző listát, és élő kereső-linkeket ad a hasznaltauto.hu-ra és a mobile.de-re. Azonnal működik. | Semmi — ingyen fut GitHub Pages-en. |
+| **Élő AI** | A valódi Claude AI **webes kereséssel valós fórumokból** kutat modell-specifikus típushibákat, karbantartási ajánlásokat és kockázatokat (forrás-linkekkel), **értelmezi a szabad szöveget**, és véleményt ír az autóról. | Anthropic API-kulcs + Vercel (lásd lent). |
+
+### Csak élő AI módban működik
+- A **szabad szöveg** értelmezése és a személyre szabott vélemény.
+- A **fórumokból gyűjtött** típushibák, karbantartás és kockázatok, forrás-linkekkel.
+
+A **kereső-linkek** (hasznaltauto.hu, mobile.de) és a bővebb űrlap-paraméterek demóban is működnek.
 
 ## Fájlok
 

@@ -99,6 +99,13 @@ ul.checklist li::before { content: "✓"; color: var(--accent); font-weight: 800
 
 .note { font-size: 0.78rem; color: var(--muted); background: var(--field); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 16px; }
 
+.links { display: flex; gap: 10px; flex-wrap: wrap; }
+.linkbtn { flex: 1 1 auto; text-align: center; text-decoration: none; font-weight: 700; font-size: 0.9rem;
+  color: var(--accent); border: 1px solid var(--accent); border-radius: 10px; padding: 11px 14px; transition: background 0.15s ease, color 0.15s ease; }
+.linkbtn:hover { background: var(--accent); color: var(--accent-ink); }
+.src { font-size: 0.8rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
+.src:hover { text-decoration: underline; }
+
 .spinner { display: grid; place-items: center; min-height: 280px; color: var(--muted); gap: 12px; }
 .spinner__dot { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
