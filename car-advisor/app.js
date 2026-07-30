@@ -475,9 +475,15 @@ function demoAnalyze(d) {
   if (issues.length === 0)
     issues.push({ title: "Nincs kiugró kockázat az adatokból", detail: "A konkrét darab állapota dönt — nézesd meg alaposan." });
 
+  const known = detectKnown(d);
+  const fc = buildForecast(d);
+  const mainRisk = pickMainRisk(fc, d.km);
+
   return {
     verdict, tone, riskScore: risk,
-    forecast: buildForecast(d),
+    forecast: fc,
+    mainRisk,
+    known,
     review:
       "🔒 A szabad szöveg értelmezése és a személyre szabott vélemény az ÉLES AI módban készül. " +
       (d.freeText ? "Amit beírtál, azt ott dolgozza fel az AI." : "Írj a szabad szöveg mezőbe, hogy az AI véleményezhesse."),
@@ -504,6 +510,31 @@ function buildForecast(d) {
   const age = Math.max(2026 - d.year, 0);
   const F = [];
   const push = (cond, o) => { if (cond) F.push(o); };
+
+  /* ===== 1) MODELL/MOTOR-SPECIFIKUS tételek a tudásbázisból =====
+     A motort a modell mezőből ÉS a szabad szövegből próbáljuk felismerni
+     (pl. „Volkswagen Golf 1.9 TDI” vagy a bemásolt hirdetés szövege). */
+  const hay = `${d.model || ""} ${d.freeText || ""}`;
+  const hits = [
+    ...(typeof KB_ENGINES !== "undefined" ? kbMatch(KB_ENGINES, hay) : []),
+    ...(typeof KB_GEARBOXES !== "undefined" ? kbMatch(KB_GEARBOXES, hay) : []),
+  ];
+  hits.forEach((entry) => {
+    entry.faults.forEach((f) => {
+      if (km < f.from - 20000) return; // még messze van, ne ijesztgessünk
+      F.push({
+        title: f.title,
+        kind: "meghibásodás",
+        urgency: km >= f.from + 60000 ? "esedékes" : km >= f.from ? "hamarosan" : "figyeld",
+        detail: `${entry.name} — ${f.detail}`,
+        estCost: f.cost,
+        specific: true,
+        sev: f.sev,
+        from: f.from,
+        engine: entry.name,
+      });
+    });
+  });
 
   // --- Motor / hajtáslánc: a legdrágább kockázatok ---
   push(km >= 70000, { title: "Vezérműszíj + vízpumpa csere", kind: "karbantartás",
@@ -581,7 +612,42 @@ function buildForecast(d) {
     detail: "Emeld fel és nézd meg alulról. Az átrozsdásodott fékcső vagy küszöb a műszakit is megbuktatja.",
     estCost: "javítás: 100 e – 1 M Ft" });
 
+  // A modell-specifikus tételek kerüljenek előre — azok a fontosabbak
+  F.sort((a, b) => (b.specific ? 1 : 0) - (a.specific ? 1 : 0));
   return F;
+}
+
+/* ===== A FŐ KOCKÁZAT kiválasztása =====
+   Nem a leghosszabb listát akarjuk, hanem AZT az egy hibát, ami ennél az
+   autónál és ennél a km-nél a legnagyobb tétet jelenti — és azt magyarázzuk
+   el részletesen, hogy a felhasználó dönteni tudjon. */
+function pickMainRisk(forecast, km) {
+  let best = null, bestScore = -1;
+  forecast.forEach((f) => {
+    let s = 0;
+    if (f.specific) s += 100;              // motor-specifikus > általános
+    if (f.sev === "high") s += 60;         // súlyos következmény
+    if (f.urgency === "esedékes") s += 30;
+    else if (f.urgency === "hamarosan") s += 15;
+    if (typeof f.from === "number" && km >= f.from) {
+      s += Math.min((km - f.from) / 20000, 10); // minél régebb óta esedékes
+    }
+    if (typeof KB_DEEP !== "undefined" && KB_DEEP[f.title]) s += 40; // van mély magyarázatunk
+    if (s > bestScore) { bestScore = s; best = f; }
+  });
+  if (!best) return null;
+  const deep = (typeof KB_DEEP !== "undefined" && KB_DEEP[best.title]) || null;
+  return { item: best, deep };
+}
+
+/* Mely motorokat/váltókat ismertük fel? (a válaszban megmutatjuk) */
+function detectKnown(d) {
+  const hay = `${d.model || ""} ${d.freeText || ""}`;
+  const hits = [
+    ...(typeof KB_ENGINES !== "undefined" ? kbMatch(KB_ENGINES, hay) : []),
+    ...(typeof KB_GEARBOXES !== "undefined" ? kbMatch(KB_GEARBOXES, hay) : []),
+  ];
+  return { names: hits.map((h) => h.name), notes: hits.map((h) => h.note).filter(Boolean) };
 }
 
 function buildChecklist(d) {
@@ -655,7 +721,21 @@ function renderResult(a, d, isDemo) {
       </div>
     </div>
 
+    ${a.known && a.known.names.length
+      ? `<div class="detected">
+           <span class="detected__label">Felismert motor / váltó</span>
+           <span class="detected__names">${a.known.names.map(esc).join(" · ")}</span>
+           ${a.known.notes.length ? `<span class="detected__note">${esc(a.known.notes[0])}</span>` : ""}
+         </div>`
+      : `<div class="detected detected--miss">
+           <span class="detected__label">Nincs felismert motor</span>
+           <span class="detected__note">Írd a modell mezőbe a motort is (pl. <b>Volkswagen Golf 1.9 TDI</b>),
+             vagy másold be a hirdetés szövegét — így motor-specifikus hibákat is kapsz az általános helyett.</span>
+         </div>`}
+
     <div class="block"><h4>Összegzés</h4><p>${esc(a.summary)}</p></div>
+
+    ${a.mainRisk ? renderMainRisk(a.mainRisk, d) : ""}
 
     ${forecast ? `<div class="block--key">
       <h4 style="display:flex;align-items:center;gap:11px;margin:0 0 6px;font-size:0.71rem;
@@ -717,6 +797,34 @@ function renderResult(a, d, isDemo) {
     };
     requestAnimationFrame(step);
   }
+}
+
+/* A fő kockázat részletes bemutatása — ez az elemzés lényege */
+function renderMainRisk(mr, d) {
+  const f = mr.item, deep = mr.deep;
+  const km = d.km.toLocaleString("hu-HU");
+  const rows = [];
+  if (deep) {
+    rows.push(["Miért éppen most?", deep.why]);
+    rows.push(["Árulkodó jelek", deep.signs]);
+    rows.push(["Mit kérdezz az eladótól?", deep.ask]);
+    rows.push(["Ha nem foglalkozol vele", deep.risk]);
+  } else {
+    rows.push(["Miről van szó?", f.detail]);
+  }
+  return `
+    <section class="mainrisk">
+      <div class="mainrisk__head">
+        <span class="mainrisk__eyebrow">A legnagyobb kockázat · ${km} km-nél</span>
+        <h3 class="mainrisk__title">${esc(f.title)}</h3>
+        ${f.engine ? `<span class="mainrisk__engine">${esc(f.engine)}</span>` : ""}
+      </div>
+      <dl class="mainrisk__body">
+        ${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
+      </dl>
+      ${f.estCost ? `<div class="mainrisk__cost">
+        <span>Ha bekövetkezik</span><b>${esc(f.estCost)}</b></div>` : ""}
+    </section>`;
 }
 
 function renderError(err) {
