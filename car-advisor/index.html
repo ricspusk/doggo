@@ -38,8 +38,32 @@
           <h2>Az autó adatai</h2>
           <form id="carForm">
             <div class="grid2">
-              <label>Márka és modell *
-                <input name="model" type="text" placeholder="pl. Volkswagen Golf" required />
+              <label class="span2">Márka és modell *
+                <input name="model" type="text" placeholder="pl. Volkswagen Golf" required
+                       autocomplete="off" list="modelHints" />
+                <datalist id="modelHints">
+                  <option>Volkswagen Golf</option>
+                  <option>Volkswagen Passat</option>
+                  <option>Volkswagen Tiguan</option>
+                  <option>Skoda Octavia</option>
+                  <option>Skoda Fabia</option>
+                  <option>Ford Focus</option>
+                  <option>Opel Astra</option>
+                  <option>Toyota Corolla</option>
+                  <option>Toyota Prius</option>
+                  <option>Toyota RAV4</option>
+                  <option>BMW 3</option>
+                  <option>BMW X3</option>
+                  <option>Audi A4</option>
+                  <option>Mercedes C</option>
+                  <option>Hyundai Tucson</option>
+                  <option>Kia Sportage</option>
+                  <option>Dacia Duster</option>
+                  <option>Suzuki Vitara</option>
+                  <option>Tesla Model 3</option>
+                  <option>Nissan Qashqai</option>
+                </datalist>
+                <span class="fieldnote" id="modelNote" hidden></span>
               </label>
               <label>Kivitel
                 <select name="bodyType">
@@ -56,6 +80,7 @@
               </label>
               <label>Évjárat *
                 <input name="year" type="number" min="1990" max="2026" placeholder="pl. 2016" required />
+                <span class="fieldnote err" id="yearNote" hidden></span>
               </label>
               <label>Futott km *
                 <input name="km" type="number" min="0" placeholder="pl. 145000" required />

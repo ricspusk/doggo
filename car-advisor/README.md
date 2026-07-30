@@ -59,8 +59,27 @@ Ez tájékoztató segéd, **nem szakértői vagy műszaki vizsgálat**. Vásárl
 mindig nézesd meg az autót független szakemberrel. Az AI-t valós adatokra
 alapozva érdemes használni; ne bízd rá vakon a döntést.
 
+## Az üzleti modell — miért nem kell hozzá hirdetési adatbázis
+
+Ez a projekt **szándékosan nem támaszkodik** arra, hogy a hasznaltauto.hu vagy a
+mobile.de adatbázisához hozzáférést kapjunk. Egy egyszemélyes vállalkozással
+ilyen szerződés nem realitás, és a scraping jogilag/technikailag zsákutca.
+
+**Az érték nem az ő adatuk, hanem a tanács.** Amit ez az oldal ad — a
+kilométeróra-állás alapján előre jelzett karbantartások, tipikus meghibásodások,
+kockázatok és költségek — teljesen független bármelyik piactértől. A friss
+hirdetéseket nem mi tároljuk: a felhasználót **átlinkeljük** hozzájuk (ez legális,
+mint bármilyen keresésre linkelni), ő pedig visszajön a tanácsért.
+
+Amit ez a modell megenged, API nélkül:
+- **Deep link** a hirdetésekhez (kész, működik).
+- **A felhasználó bemásolja** a hirdetés szövegét a szabad szöveg mezőbe — ez az
+  ő adata, szabadon feldolgozható; az AI ebből is elemez.
+- A saját **tudásbázis** bővítése (gyártói szerviztervek, fórumokból gyűjtött
+  típushibák) — ez a valódi versenyelőny, és senkitől nem függ.
+
 ## Következő lépések (ötletek)
 
+- A km-alapú tudásbázis bővítése további modellekre és motorokra.
 - Több autó összehasonlítása egymás mellett.
 - Valódi Patreon-link a támogató gombra.
-- Jogtiszta ár-adatforrás bekötése (API/partnerség) a pontosabb ár-értékeléshez.

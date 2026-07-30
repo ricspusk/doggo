@@ -19,8 +19,292 @@ const modePill = document.getElementById("modePill");
 
 modePill.textContent = API_URL ? "Élő AI" : "Demó mód";
 
+/* ============================================================
+   MODELL-ISMERŐ SZŰRŐK
+   Ha a modell csak bizonyos kivitelben/üzemanyaggal/váltóval létezik,
+   a többi opciót letiltjuk, hogy ne lehessen nem létező kombinációt
+   megadni. Az első illeszkedő szabály érvényes, ezért a specifikusabb
+   minta (pl. "kona electric") előbb szerepel, mint az általános ("kona").
+   ISMERETLEN modellnél nem korlátozunk semmit.
+   ============================================================ */
+const SUV = ["SUV / Terepjáró"];
+const HATCH = ["Ferdehátú"];
+const EV = { fuels: ["Elektromos"], gearboxes: ["Automata"] };
+const EV_NOTE = "Ez a modell kizárólag elektromos, egyfokozatú automata hajtással készül.";
+
+/* A `years: [tól, ig]` a modell gyártási időszaka (ig = null → ma is gyártják).
+   Csak akkor adjuk meg, ha biztosak vagyunk benne — inkább hallgatunk, mint
+   tévesen figyelmeztetünk. */
+const MODEL_RULES = [
+  // --- Tisztán elektromos modellek ---
+  { m: /tesla\s*model\s*3/, ...EV, bodyTypes: ["Sedan / Limuzin"], years: [2017, null], note: EV_NOTE },
+  { m: /tesla\s*model\s*y/, ...EV, bodyTypes: SUV, years: [2020, null], note: EV_NOTE },
+  { m: /tesla\s*model\s*s/, ...EV, years: [2012, null], note: EV_NOTE },
+  { m: /tesla\s*model\s*x/, ...EV, bodyTypes: SUV, years: [2015, null], note: EV_NOTE },
+  { m: /^tesla/, ...EV, years: [2012, null], note: EV_NOTE },
+  { m: /(vw|volkswagen)\s*id\.?\s*3/, ...EV, bodyTypes: HATCH, years: [2020, null], note: EV_NOTE },
+  { m: /(vw|volkswagen)\s*id\.?\s*[45]/, ...EV, bodyTypes: SUV, years: [2021, null], note: EV_NOTE },
+  { m: /(vw|volkswagen)\s*id/, ...EV, years: [2020, null], note: EV_NOTE },
+  { m: /nissan\s*leaf|^leaf/, ...EV, bodyTypes: HATCH, years: [2010, null], note: EV_NOTE },
+  { m: /ioniq\s*5/, ...EV, years: [2021, null], note: EV_NOTE },
+  { m: /ioniq\s*6/, ...EV, years: [2022, null], note: EV_NOTE },
+  { m: /kona\s*electric/, ...EV, bodyTypes: SUV, years: [2018, null], note: EV_NOTE },
+  { m: /kia\s*ev\s*6/, ...EV, years: [2021, null], note: EV_NOTE },
+  { m: /kia\s*ev\s*9/, ...EV, bodyTypes: SUV, years: [2023, null], note: EV_NOTE },
+  { m: /enyaq/, ...EV, bodyTypes: SUV, years: [2021, null], note: EV_NOTE },
+  { m: /zoe/, ...EV, bodyTypes: HATCH, years: [2012, null], note: EV_NOTE },
+  { m: /megane\s*e/, ...EV, years: [2022, null], note: EV_NOTE },
+  { m: /bmw\s*i3|^i3\b/, ...EV, bodyTypes: HATCH, years: [2013, 2022], note: EV_NOTE },
+  { m: /bmw\s*i4|^i4\b/, ...EV, years: [2021, null], note: EV_NOTE },
+  { m: /bmw\s*ix|^ix\b/, ...EV, bodyTypes: SUV, years: [2021, null], note: EV_NOTE },
+  { m: /q4\s*e[- ]?tron/, ...EV, bodyTypes: SUV, years: [2021, null], note: EV_NOTE },
+  { m: /e[- ]?tron/, ...EV, years: [2019, null], note: EV_NOTE },
+  { m: /mercedes.*\beq|^eq[a-z]/, ...EV, years: [2019, null], note: EV_NOTE },
+  { m: /taycan/, ...EV, years: [2019, null], note: EV_NOTE },
+  { m: /dacia\s*spring/, ...EV, bodyTypes: SUV, years: [2021, null], note: EV_NOTE },
+  { m: /born/, ...EV, bodyTypes: HATCH, years: [2021, null], note: EV_NOTE },
+  { m: /polestar/, ...EV, years: [2019, null], note: EV_NOTE },
+  { m: /fiat\s*500\s*e|500e/, ...EV, bodyTypes: HATCH, years: [2020, null], note: EV_NOTE },
+  { m: /\bmg\s*4\b/, ...EV, bodyTypes: HATCH, years: [2022, null], note: EV_NOTE },
+
+  // --- Tisztán hibrid modellek (eCVT = automata) ---
+  { m: /prius/, fuels: ["Hibrid"], gearboxes: ["Automata"], bodyTypes: HATCH, years: [1997, null],
+    note: "A Prius kizárólag hibrid, eCVT automata hajtással készül." },
+
+  // --- Csak automata váltóval (hagyományos motorral) ---
+  { m: /grand\s*cherokee/, gearboxes: ["Automata"], bodyTypes: SUV, drivetrains: ["Összkerék"],
+    years: [1992, null], note: "A Grand Cherokee csak automata váltóval és összkerékhajtással készült." },
+  { m: /range\s*rover(?!\s*evoque)/, gearboxes: ["Automata"], bodyTypes: SUV, drivetrains: ["Összkerék"],
+    note: "A Range Rover csak automata váltóval és összkerékhajtással készült." },
+
+  // --- SUV-ok (kivitel kötött) ---
+  { m: /t-roc/, bodyTypes: SUV, years: [2017, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /t-cross/, bodyTypes: SUV, years: [2019, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /tiguan/, bodyTypes: SUV, years: [2007, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /touareg/, bodyTypes: SUV, years: [2002, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /kodiaq/, bodyTypes: SUV, years: [2016, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /karoq/, bodyTypes: SUV, years: [2017, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /kamiq/, bodyTypes: SUV, years: [2019, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /tucson/, bodyTypes: SUV, years: [2004, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /santa\s*fe/, bodyTypes: SUV, years: [2000, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /sportage/, bodyTypes: SUV, years: [1993, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /sorento/, bodyTypes: SUV, years: [2002, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /qashqai/, bodyTypes: SUV, years: [2006, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /x-trail/, bodyTypes: SUV, years: [2000, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /juke/, bodyTypes: SUV, years: [2010, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /rav\s*4|rav4/, bodyTypes: SUV, years: [1994, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /c-hr|\bchr\b/, bodyTypes: SUV, years: [2016, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /cr-v/, bodyTypes: SUV, years: [1995, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /hr-v/, bodyTypes: SUV, years: [1999, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /mazda\s*cx|^cx-\d/, bodyTypes: SUV, years: [2006, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /kuga/, bodyTypes: SUV, years: [2008, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /ford\s*puma/, bodyTypes: SUV, years: [2019, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /mokka/, bodyTypes: SUV, years: [2012, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /grandland/, bodyTypes: SUV, years: [2017, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /crossland/, bodyTypes: SUV, years: [2017, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /\b2008\b/, bodyTypes: SUV, years: [2013, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /\b3008\b/, bodyTypes: SUV, years: [2008, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /\b5008\b/, bodyTypes: SUV, years: [2009, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /aircross/, bodyTypes: SUV, years: [2017, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /duster/, bodyTypes: SUV, years: [2010, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /captur/, bodyTypes: SUV, years: [2013, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /kadjar/, bodyTypes: SUV, years: [2015, 2022], note: "Ez a modell SUV kivitelben készül." },
+  { m: /austral/, bodyTypes: SUV, years: [2022, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /bmw\s*x7|^x7\b/, bodyTypes: SUV, years: [2018, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /bmw\s*x[1-6]|^x[1-6]\b/, bodyTypes: SUV, note: "Ez a modell SUV kivitelben készül." },
+  { m: /audi\s*q[1-8]|^q[1-8]\b/, bodyTypes: SUV, note: "Ez a modell SUV kivitelben készül." },
+  { m: /\b(gla|glb|glc|gle|gls)\b/, bodyTypes: SUV, note: "Ez a modell SUV kivitelben készül." },
+  { m: /volvo\s*xc|^xc\d/, bodyTypes: SUV, note: "Ez a modell SUV kivitelben készül." },
+  { m: /vitara/, bodyTypes: SUV, years: [1988, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /s-cross/, bodyTypes: SUV, years: [2013, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /forester/, bodyTypes: SUV, years: [1997, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /outlander/, bodyTypes: SUV, years: [2001, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /\basx\b/, bodyTypes: SUV, years: [2010, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /eclipse\s*cross/, bodyTypes: SUV, years: [2017, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /cayenne/, bodyTypes: SUV, years: [2002, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /macan/, bodyTypes: SUV, years: [2014, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /ateca/, bodyTypes: SUV, years: [2016, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /arona/, bodyTypes: SUV, years: [2017, null], note: "Ez a modell SUV kivitelben készül." },
+  { m: /defender|wrangler/, bodyTypes: SUV, drivetrains: ["Összkerék"],
+    note: "Terepjáró: összkerékhajtással készül." },
+
+  // --- Kisautók: csak ferdehátú ---
+  { m: /\bpolo\b/, bodyTypes: HATCH, years: [1975, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\bup!?\b/, bodyTypes: HATCH, years: [2011, 2023], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /fiesta/, bodyTypes: HATCH, years: [1976, 2023], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /corsa/, bodyTypes: HATCH, years: [1982, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\bclio\b/, bodyTypes: HATCH, years: [1990, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /yaris(?!\s*cross)/, bodyTypes: HATCH, years: [1999, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /swift/, bodyTypes: HATCH, years: [1983, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\bjazz\b/, bodyTypes: HATCH, years: [2001, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /micra/, bodyTypes: HATCH, years: [1982, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\bpanda\b/, bodyTypes: HATCH, years: [1980, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\bi10\b/, bodyTypes: HATCH, years: [2007, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\bi20\b/, bodyTypes: HATCH, years: [2008, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /picanto/, bodyTypes: HATCH, years: [2004, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\baygo\b/, bodyTypes: HATCH, years: [2005, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /twingo/, bodyTypes: HATCH, years: [1992, null], note: "Ez a modell ferdehátú kivitelben készül." },
+  { m: /\b(108|208)\b/, bodyTypes: HATCH, note: "Ez a modell ferdehátú kivitelben készül." },
+
+  // --- Ferdehátú + kombi ---
+  { m: /\bgolf\b(?!\s*plus)/, bodyTypes: ["Ferdehátú", "Kombi"], years: [1974, null],
+    note: "Ez a modell ferdehátú és kombi (Variant) kivitelben készül." },
+  { m: /astra/, bodyTypes: ["Ferdehátú", "Kombi"], years: [1991, null],
+    note: "Ez a modell ferdehátú és kombi kivitelben készül." },
+  { m: /focus/, bodyTypes: ["Ferdehátú", "Kombi"], years: [1998, null],
+    note: "Ez a modell ferdehátú és kombi kivitelben készül." },
+  { m: /megane(?!\s*e)/, bodyTypes: ["Ferdehátú", "Kombi"], years: [1995, null],
+    note: "Ez a modell ferdehátú és kombi kivitelben készül." },
+  { m: /civic/, bodyTypes: ["Ferdehátú", "Sedan / Limuzin"], years: [1972, null],
+    note: "Ez a modell ferdehátú és sedan kivitelben készül." },
+  { m: /\b308\b/, bodyTypes: ["Ferdehátú", "Kombi"], years: [2007, null],
+    note: "Ez a modell ferdehátú és kombi kivitelben készül." },
+
+  // --- Sedan + kombi ---
+  { m: /octavia/, bodyTypes: ["Sedan / Limuzin", "Kombi"], years: [1996, null],
+    note: "Ez a modell sedan (liftback) és kombi kivitelben készül." },
+  { m: /superb/, bodyTypes: ["Sedan / Limuzin", "Kombi"], years: [2001, null],
+    note: "Ez a modell sedan és kombi kivitelben készül." },
+  { m: /passat/, bodyTypes: ["Sedan / Limuzin", "Kombi"], years: [1973, null],
+    note: "Ez a modell sedan és kombi kivitelben készül." },
+  { m: /mondeo/, bodyTypes: ["Sedan / Limuzin", "Kombi"], years: [1993, 2022],
+    note: "Ez a modell sedan és kombi kivitelben készül." },
+  { m: /insignia/, bodyTypes: ["Sedan / Limuzin", "Kombi"], years: [2008, 2022],
+    note: "Ez a modell sedan és kombi kivitelben készül." },
+  { m: /\b508\b/, bodyTypes: ["Sedan / Limuzin", "Kombi"], years: [2010, null],
+    note: "Ez a modell sedan és kombi kivitelben készül." },
+];
+
+const selects = {
+  fuel: form.elements.fuel,
+  gearbox: form.elements.gearbox,
+  bodyType: form.elements.bodyType,
+  drivetrain: form.elements.drivetrain,
+};
+// Az eredeti opciólistát elmentjük, hogy visszaállítható legyen
+const ORIGINAL = {};
+Object.entries(selects).forEach(([k, sel]) => {
+  ORIGINAL[k] = Array.from(sel.options).map((o) => o.value);
+});
+const modelNote = document.getElementById("modelNote");
+const RULE_KEYS = { fuels: "fuel", gearboxes: "gearbox", bodyTypes: "bodyType", drivetrains: "drivetrain" };
+const FORCED = new Set(); // mely mezők értékét kényszerítette szabály
+
+function findRule(text) {
+  const t = String(text || "").toLowerCase().trim();
+  if (t.length < 3) return null;
+  return MODEL_RULES.find((r) => r.m.test(t)) || null;
+}
+
+const yearInput = form.elements.year;
+const yearNote = document.getElementById("yearNote");
+let activeRule = null;
+
+/* Évjárat-ellenőrzés: a modell gyártási időszakán kívüli év nem érvényes. */
+function checkYear() {
+  const y = Number(yearInput.value);
+  const span = activeRule && activeRule.years;
+  if (!span || !y) { yearNote.hidden = true; yearInput.setCustomValidity(""); return true; }
+  const [from, to] = span;
+  const until = to || 2026;
+  if (y < from || y > until) {
+    const range = to ? `${from}–${to}` : `${from}-tól`;
+    const msg = `Ez a modell ${range} készült — a ${y} nem létező évjárat hozzá.`;
+    yearNote.textContent = "⚠️ " + msg;
+    yearNote.hidden = false;
+    yearInput.setCustomValidity(msg);
+    return false;
+  }
+  yearNote.hidden = true;
+  yearInput.setCustomValidity("");
+  return true;
+}
+
+function applyModelRules() {
+  const rule = findRule(form.elements.model.value);
+  activeRule = rule;
+
+  // 1) Mindent visszaállítunk alapállapotba
+  Object.entries(selects).forEach(([key, sel]) => {
+    Array.from(sel.options).forEach((o) => (o.disabled = false));
+    sel.disabled = false;
+    sel.classList.remove("locked");
+  });
+  yearInput.min = 1990;
+  yearInput.max = 2026;
+
+  // Ha egy korábbi szabály kényszerített egy értéket, és az új modellnél ez már
+  // nem kötelező, visszaállítjuk alapértékre (különben pl. a Prius után a Golf
+  // is "Hibrid"-en maradna).
+  Object.entries(RULE_KEYS).forEach(([ruleKey, selKey]) => {
+    if (!FORCED.has(selKey)) return;
+    const stillRequired = rule && rule[ruleKey] && rule[ruleKey].includes(selects[selKey].value);
+    if (!stillRequired) {
+      selects[selKey].value = ORIGINAL[selKey][0];
+      FORCED.delete(selKey);
+    }
+  });
+
+  if (!rule) { modelNote.hidden = true; checkYear(); return; }
+
+  // Évjárat-korlát a modell gyártási időszakára
+  if (rule.years) {
+    yearInput.min = rule.years[0];
+    yearInput.max = rule.years[1] || 2026;
+  }
+  checkYear();
+
+  // 2) Alkalmazzuk a szabályt: a nem létező opciókat letiltjuk
+  let changed = false;
+  Object.entries(RULE_KEYS).forEach(([ruleKey, selKey]) => {
+    const allowed = rule[ruleKey];
+    if (!allowed) return;
+    const sel = selects[selKey];
+    let firstAllowed = null;
+    Array.from(sel.options).forEach((o) => {
+      const isEmpty = o.value === "";        // a "—" mindig maradhat
+      const ok = isEmpty || allowed.includes(o.value);
+      o.disabled = !ok;
+      if (ok && !isEmpty && firstAllowed === null) firstAllowed = o.value;
+    });
+    // Ha az aktuális választás érvénytelen lett, átállítjuk
+    if (sel.value && !allowed.includes(sel.value) && firstAllowed) {
+      sel.value = firstAllowed;
+      FORCED.add(selKey);
+      changed = true;
+    }
+    // Egyetlen lehetőség → vizuálisan zároljuk.
+    // FIGYELEM: NEM állítunk sel.disabled = true-t, mert a letiltott mező
+    // értéke nem kerül bele a FormData-ba (elveszne pl. az üzemanyag).
+    // A többi opció letiltása miatt más nem választható.
+    if (allowed.length === 1) {
+      if (!sel.value || sel.value === "") sel.value = allowed[0];
+      sel.classList.add("locked");
+      FORCED.add(selKey);
+    }
+  });
+
+  let note = rule.note;
+  if (rule.years) {
+    note += ` Gyártás: ${rule.years[0]}–${rule.years[1] || "napjainkig"}.`;
+  }
+  modelNote.textContent = "ℹ️ " + note + (changed ? " A választást ehhez igazítottuk." : "");
+  modelNote.hidden = false;
+}
+
+form.elements.model.addEventListener("input", applyModelRules);
+form.elements.model.addEventListener("change", applyModelRules);
+yearInput.addEventListener("input", checkYear);
+applyModelRules();
+
 form.addEventListener("submit", async function (e) {
   e.preventDefault();
+  // Nem létező kombinációval nem indulunk el
+  if (typeof checkYear === "function" && !checkYear()) {
+    form.elements.year.focus();
+    form.elements.year.reportValidity();
+    return;
+  }
   const d = Object.fromEntries(new FormData(form).entries());
   d.year = Number(d.year);
   d.km = Number(d.km);
