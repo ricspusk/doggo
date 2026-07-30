@@ -171,53 +171,91 @@ function demoAnalyze(d) {
   };
 }
 
-/* Km-alapú előrejelzés: mi esedékes / mi romolhat el a következő ~50e km-ben */
+/* Km-alapú előrejelzés: mi esedékes / mi romolhat el a következő ~50e km-ben.
+   SZÁNDÉKOSAN kihagyjuk a rutin fogyóeszközöket (olajcsere, szűrők, fékbetét,
+   gyertya, folyadékok) — azok kis összegűek és nem befolyásolják a vételi döntést.
+   Csak a pénztárcát vagy a motort érdemben érintő tételek kerülnek be. */
 function buildForecast(d) {
   const km = d.km;
   const age = Math.max(2026 - d.year, 0);
-  const horizon = km + 50000;
   const F = [];
-  const fmt = (n) => Math.round(n).toLocaleString("hu-HU");
-
-  // Ismétlődő karbantartások — a következő esedékesség
-  [
-    { every: 15000, title: "Olaj- és szűrőcsere", cost: "kb. 25–60 e Ft" },
-    { every: 30000, title: "Levegő- és pollenszűrő", cost: "kb. 10–30 e Ft" },
-    { every: 60000, title: "Fékbetét / féktárcsa ellenőrzés-csere", cost: "kb. 30–90 e Ft" },
-  ].forEach((r) => {
-    const next = Math.ceil((km + 1) / r.every) * r.every;
-    if (next <= horizon)
-      F.push({ title: r.title, kind: "karbantartás", urgency: next - km <= 5000 ? "esedékes" : "hamarosan",
-        detail: `Következő esedékesség kb. ${fmt(next)} km-nél.`, estCost: r.cost });
-  });
-
   const push = (cond, o) => { if (cond) F.push(o); };
 
+  // --- Motor / hajtáslánc: a legdrágább kockázatok ---
   push(km >= 70000, { title: "Vezérműszíj + vízpumpa csere", kind: "karbantartás",
     urgency: km >= 120000 ? "esedékes" : "hamarosan",
-    detail: "Típusfüggő 60–120 e km. Elmulasztva komoly, drága motorkárt okozhat — KÉRDEZZ rá, cserélték-e és mikor. (Sok modellnél lánc van szíj helyett; ott a lánc nyúlása a kockázat.)",
+    detail: "Típusfüggő 60–120 e km-enként. Elmulasztva a szíj elszakad és TÖNKREMEGY a motor — kérdezz rá, cserélték-e és mikor, kérj számlát.",
     estCost: "kb. 80–250 e Ft" });
-  push(d.fuel === "Benzin" && km >= 50000, { title: "Gyújtógyertya csere", kind: "karbantartás",
-    urgency: "hamarosan", detail: "Kb. 60–90 e km-enként.", estCost: "kb. 15–50 e Ft" });
+  push(km >= 120000, { title: "Vezérműlánc nyúlása (láncos motoroknál)", kind: "meghibásodás",
+    urgency: km >= 180000 ? "esedékes" : "figyeld",
+    detail: "Hidegindításkor csörgő/zörgő hang az árulkodó jel. Sok modellnél 150–250 e km körül jelentkezik, és a javítás motorbontással jár.",
+    estCost: "kb. 200–700 e Ft" });
   push(d.gearbox === "Automata", { title: "Automata / DSG váltóolaj csere", kind: "karbantartás",
     urgency: km >= 60000 ? "esedékes" : "figyeld",
-    detail: "Sokan kihagyják, pedig kihagyva a váltó tönkremehet. Kérj rá dokumentumot.",
+    detail: "Sokan kihagyják — kihagyva a váltó tönkremehet, ami a legdrágább javítások egyike. Kérj rá dokumentumot.",
     estCost: "kb. 60–150 e Ft" });
-  push(km >= 100000, { title: "Hűtő- és fékfolyadék frissítés", kind: "karbantartás",
-    urgency: "hamarosan", detail: "Öregedő folyadékok — nézd meg, mikor cserélték.", estCost: "kb. 20–50 e Ft" });
-
+  push(d.gearbox === "Automata" && km >= 150000, { title: "Automata váltó / DSG kuplung felújítás", kind: "meghibásodás",
+    urgency: km >= 200000 ? "esedékes" : "figyeld",
+    detail: "Rángatás, késés, csúszás a jele. 150–250 e km felett reális kockázat.",
+    estCost: "kb. 300–900 e Ft" });
   push(d.gearbox === "Manuális" && km >= 140000, { title: "Kuplung + kétsúlyú lendkerék (DMF)", kind: "meghibásodás",
     urgency: km >= 180000 ? "esedékes" : "figyeld",
-    detail: "150–200 e km körül gyakran cserére szorul; a kétsúlyú lendkerék drágítja.", estCost: "kb. 150–400 e Ft" });
-  push(km >= 130000, { title: "Futómű: szilentek, csapágyak, összekötők", kind: "meghibásodás",
-    urgency: "figyeld", detail: "Kattogás, zaj, kormányba visszaadó rezgés az árulkodó jel.", estCost: "kb. 20–120 e Ft / elem" });
-  push(d.fuel === "Dízel" && km >= 150000, { title: "Dízel: DPF / EGR / turbó / injektor", kind: "meghibásodás",
+    detail: "150–200 e km körül gyakran cserére szorul; a kétsúlyú lendkerék jelentősen drágítja.",
+    estCost: "kb. 150–400 e Ft" });
+  push(km >= 220000, { title: "Motor általános állapota (olajfogyás, kompresszió)", kind: "meghibásodás",
+    urgency: "figyeld",
+    detail: "Nagyon magas km-nél a dugattyúgyűrűk / hengerfej kopása olajfogyást és teljesítményvesztést okozhat. Kérj kompresszió-mérést.",
+    estCost: "felújítás: 600 e – 2 M Ft" });
+
+  // --- Üzemanyag-specifikus drága elemek ---
+  push(d.fuel === "Dízel" && km >= 120000, { title: "Dízel: DPF (részecskeszűrő) eltömődés", kind: "meghibásodás",
     urgency: d.usage === "városi" ? "esedékes" : "figyeld",
-    detail: "Városi használatnál különösen kockázatos; a javítás drága lehet.", estCost: "kb. 100–500 e Ft" });
-  push(age >= 5, { title: "Akkumulátor", kind: "karbantartás", urgency: age >= 6 ? "esedékes" : "figyeld",
-    detail: `Kb. ${age} éves — 4–6 év a jellemző élettartam.`, estCost: "kb. 25–70 e Ft" });
+    detail: "Városi, rövid utas használatnál nem tud regenerálódni. Tisztítás olcsóbb, csere drága.",
+    estCost: "tisztítás 50–120 e Ft / csere 250–600 e Ft" });
+  push(d.fuel === "Dízel" && km >= 130000, { title: "Dízel: EGR-szelep és turbó", kind: "meghibásodás",
+    urgency: km >= 180000 ? "esedékes" : "figyeld",
+    detail: "Kormos EGR és kifáradó turbó tipikus ebben a km-sávban; teljesítményvesztés, füstölés a jel.",
+    estCost: "EGR 60–200 e Ft / turbó 200–600 e Ft" });
+  push(d.fuel === "Dízel" && km >= 150000, { title: "Dízel: injektorok / adagoló", kind: "meghibásodás",
+    urgency: "figyeld",
+    detail: "Nehéz indítás, egyenetlen üresjárat, füstölés. Common rail injektor darabja is jelentős összeg.",
+    estCost: "kb. 80–150 e Ft / injektor" });
+  push(d.fuel === "Benzin" && km >= 150000, { title: "Katalizátor / lambdaszondák", kind: "meghibásodás",
+    urgency: "figyeld",
+    detail: "Hibás lambda vagy kimerült katalizátor miatt nem megy át a vizsgán; magas fogyasztás a jel.",
+    estCost: "kb. 80–350 e Ft" });
+  push((d.fuel === "Hibrid" || d.fuel === "Elektromos") && km >= 120000, { title: "Hajtásakkumulátor kapacitásvesztés", kind: "meghibásodás",
+    urgency: km >= 200000 ? "esedékes" : "figyeld",
+    detail: "A legdrágább alkatrész — MINDIG kérj akkumulátor-egészség (SoH) mérést vásárlás előtt.",
+    estCost: "kb. 800 e – 4 M Ft" });
+
+  // --- Futómű, kormányzás, elektronika ---
+  push(km >= 130000, { title: "Lengéscsillapítók (tengelyenként)", kind: "meghibásodás",
+    urgency: km >= 180000 ? "esedékes" : "figyeld",
+    detail: "150–200 e km körül tipikusan kifáradnak: bizonytalan úttartás, bukdácsolás, egyenetlen gumikopás.",
+    estCost: "kb. 100–250 e Ft" });
+  push(km >= 140000, { title: "Futómű: szilentek, lengőkarok, csapágyak", kind: "meghibásodás",
+    urgency: "figyeld",
+    detail: "Kattogás, zaj, kormányba visszaadó rezgés. Több elem egyszerre is szokott cserére érni.",
+    estCost: "kb. 100–300 e Ft (több elem)" });
+  push(km >= 160000, { title: "Kormánymű / szervoszivattyú", kind: "meghibásodás",
+    urgency: "figyeld",
+    detail: "Kopogás kormányzáskor, folyás, nehéz kormányzás. Elektromos szervónál a motor cseréje drága.",
+    estCost: "kb. 100–350 e Ft" });
+  push(km >= 170000, { title: "Generátor / önindító", kind: "meghibásodás",
+    urgency: "figyeld",
+    detail: "180–250 e km körül tipikus kifáradás; nehéz indítás, töltési hiba a jel.",
+    estCost: "kb. 60–200 e Ft" });
+  push(age >= 10, { title: "Klímakompresszor / klímarendszer", kind: "meghibásodás",
+    urgency: "figyeld",
+    detail: "Idősebb autóknál a kompresszor vagy a kondenzátor gyakori hibapont — nyáron derül ki. Próbáld ki, hűt-e rendesen.",
+    estCost: "kb. 100–350 e Ft" });
+
+  // --- Karosszéria ---
   push(age >= 10, { title: "Rozsdásodás (küszöb, aljváz, fékcsövek)", kind: "meghibásodás",
-    urgency: "figyeld", detail: "Idős autónál emeld fel és nézd meg alulról is.", estCost: "változó" });
+    urgency: age >= 15 ? "esedékes" : "figyeld",
+    detail: "Emeld fel és nézd meg alulról. Az átrozsdásodott fékcső vagy küszöb a műszakit is megbuktatja.",
+    estCost: "javítás: 100 e – 1 M Ft" });
 
   return F;
 }
@@ -297,6 +335,7 @@ function renderResult(a, d, isDemo) {
     ${forecast ? `<div class="section highlight">
       <h3>⏱️ Mi jön a vásárlás után? — ${d.km.toLocaleString("hu-HU")} km-től a következő 50 000 km-ben</h3>
       <ul class="issues forecast">${forecast}</ul>
+      <p class="hint">Csak a döntést érdemben befolyásoló tételek. A rutin fogyóeszközöket (olajcsere, szűrők, fékbetét, gyertya, folyadékok) szándékosan nem listázzuk.</p>
     </div>` : ""}
 
     ${a.review ? `<div class="section"><h3>Vélemény</h3><p>${esc(a.review)}</p></div>` : ""}

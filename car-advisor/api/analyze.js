@@ -56,6 +56,14 @@ export default async function handler(req, res) {
       "(cél: 6-12 tétel), mindegyiknél KM-ÉRTÉKKEL ('a szíj 180 000 km-nél esedékes'), " +
       "sürgősséggel és tájékoztató költséggel. Ez a felhasználó fő kérdése: 'mire készüljek, " +
       "ha ennyi km-rel megveszem?'\n\n" +
+      "NE listázd a rutin fogyóeszközöket: motorolaj- és szűrőcsere, levegő/pollen/üzemanyagszűrő, " +
+      "fékbetét és féktárcsa, gyújtógyertya, ablaktörlő, hűtő- és fékfolyadék, akkumulátor. " +
+      "Ezek kis összegűek és nem befolyásolják a vételi döntést — kihagyásuk szándékos. " +
+      "CSAK olyan tételt írj, ami vagy jelentős kiadás (durván 60 000 Ft felett), vagy " +
+      "elhanyagolva komoly kárt okoz (pl. vezérműszíj, váltóolaj). Előnyben: vezérmű (szíj/lánc), " +
+      "váltó és kuplung/lendkerék, turbó, DPF/EGR/injektor, katalizátor, hajtásakkumulátor, " +
+      "lengéscsillapító és futómű, kormánymű, generátor/önindító, klímakompresszor, " +
+      "motor általános állapota, rozsdásodás.\n\n" +
       "HASZNÁLD a web_search eszközt: keress rá a konkrét márkára/modellre/motorra/évjáratra és " +
       "olyan kifejezésekre, mint 'típushibák', 'common problems', 'reliability', " +
       "'maintenance schedule', 'at 200000 km', fórumnevek. Valós tulajdonosi fórumokból és " +
