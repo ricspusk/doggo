@@ -1,8 +1,36 @@
-# AutóTanács — használtautó vásárlási segéd (MVP)
+# AutóTanács — használtautó vásárlási segéd
 
-Egy egyszerű webalkalmazás: megadod egy használtautó adatait, és kapsz egy
-tájékoztató **kockázati elemzést** + **ellenőrző listát** vásárlás előtt.
-Patreonon támogatható, első körben ingyenes.
+Két szolgáltatás egy oldalon. Patreonon támogatható, első körben ingyenes.
+
+## A két szolgáltatás
+
+### 1. „Melyik autót vegyem?" — a fő csapásirány
+
+Kitöltesz egy **rövid űrlapot** (keret, használat, hányan utaztok, évi km,
+váltó, mi a legfontosabb) és írsz **pár mondatot a saját szavaiddal**. Cserébe
+**három konkrét típus-javaslatot** kapsz, mindegyiknél megmondva:
+
+- **melyik motorral és melyik évjárattal** érdemes megvenni, és mennyiért,
+- **miért** pont az a jó válasz a te helyzetedre,
+- **mire figyelj** annál a típusnál, és **melyik változatát kerüld el**,
+- élő hirdetés-linkek a hasznaltauto.hu-ra és a mobile.de-re (évjáratra,
+  üzemanyagra, váltóra és árra szűrve).
+
+A **keret kemény korlát**: olyan konfigurációt soha nem ajánlunk, aminek az alsó
+ára sem fér bele. Ha semmi nem fér bele, megmondjuk, honnan indulna reálisan.
+
+A szabad szöveget értelmezzük, és **vissza is mutatjuk, mit értettünk meg
+belőle** — így látod, hogy nem a semmiből jött a javaslat.
+
+### 2. „Már kiszemeltem egyet" — a konkrét autó elemzése
+
+Ha van egy hirdetés a szemed előtt, megadod az adatait, és a **kilométeróra-állás
+alapján** megmutatjuk a **legnagyobb kockázatot** (mélyen elmagyarázva: miért
+most, mik az árulkodó jelek, mit kérdezz az eladótól, mibe kerül), plusz azt,
+hogy mi jön a következő 50 000 km-ben.
+
+A két szolgáltatás **össze van kötve**: az ajánlás alatti „Elemezd ezt" gomb
+átemeli a javasolt típust, motort és évjáratot a második űrlapba.
 
 ## Két üzemmód
 
@@ -21,8 +49,11 @@ A **kereső-linkek** (hasznaltauto.hu, mobile.de) és a bővebb űrlap-paraméte
 
 | Fájl | Szerep |
 | ---- | ------ |
-| `index.html`, `style.css` | A felület (űrlap + eredmény). |
-| `app.js` | A logika: demó elemzés, és opcionálisan az élő AI hívása. |
+| `index.html`, `style.css` | A felület: két szolgáltatás, két űrlap, két eredménypanel. |
+| `cars.js` | **A típusajánló katalógusa**: modellgenerációk, konkrét ajánlott motor + évjárat + ár, erősségek, kockázatok, kerülendő változatok. |
+| `advise.js` | A típusajánló logikája: szabad szöveg értelmezése, pontozás, keret-korlát, megjelenítés. |
+| `knowledge.js` | **A tudásbázis**: motorok és váltók típushibái km-küszöbbel, plusz mély magyarázatok a legsúlyosabb hibákra. |
+| `app.js` | A konkrét autó elemzése: modell-szabályok, km-alapú előrejelzés, fő kockázat, kereső-linkek. |
 | `api/analyze.js` | A szerver-funkció, ami a Claude AI-t hívja (Vercelen fut). |
 | `package.json` | A backend függősége (`@anthropic-ai/sdk`). |
 
@@ -70,6 +101,10 @@ kilométeróra-állás alapján előre jelzett karbantartások, tipikus meghibá
 kockázatok és költségek — teljesen független bármelyik piactértől. A friss
 hirdetéseket nem mi tároljuk: a felhasználót **átlinkeljük** hozzájuk (ez legális,
 mint bármilyen keresésre linkelni), ő pedig visszajön a tanácsért.
+
+A **típusajánló** ezt még élesebbé teszi: az, hogy *melyik autót érdemes
+megvenni*, egyáltalán nem a piactér adata — az a saját tudásunk. A friss
+hirdetéseket úgyis náluk nézi meg a felhasználó, de a döntést nálunk hozza meg.
 
 Amit ez a modell megenged, API nélkül:
 - **Deep link** a hirdetésekhez (kész, működik).

@@ -446,10 +446,13 @@ function mobiledeUrl(d) {
   if (fuel) p.set("fuels", fuel);
 
   if (d.year) {
-    p.set("minFirstRegistrationDate", `${d.year - 1}-01-01`);
-    p.set("maxFirstRegistrationDate", `${d.year + 1}-12-31`);
+    // Konkrét autónál ±1 év a szórás; ajánlásnál kapunk egy tól–ig sávot
+    const to = d.yearTo || d.year + 1;
+    p.set("minFirstRegistrationDate", `${d.year - (d.yearTo ? 0 : 1)}-01-01`);
+    p.set("maxFirstRegistrationDate", `${to}-12-31`);
   }
   if (d.km) p.set("maxMileage", String(Math.round(d.km * 1.3)));
+  if (d.maxPrice) p.set("maxPrice", String(Math.round(d.maxPrice / 400))); // Ft → EUR közelítés
   if (d.gearbox === "Automata") p.set("transmissions", "AUTOMATIC_GEAR");
   else if (d.gearbox === "Manuális") p.set("transmissions", "MANUAL_GEAR");
 
@@ -549,12 +552,18 @@ function buildForecast(d) {
     });
   });
 
+  /* Ha felismertük a MOTORT, az általános vezérlés-tételeket kihagyjuk: a
+     tudásbázis pontosan tudja, hogy az adott motorban szíj van-e vagy lánc.
+     Enélkül szíjcserét írnánk ki láncos motorra is — pont az a fajta
+     általánosság, amit el akarunk kerülni. */
+  const knownEngine = (typeof KB_ENGINES !== "undefined") && kbMatch(KB_ENGINES, hay).length > 0;
+
   // --- Motor / hajtáslánc: a legdrágább kockázatok ---
-  push(km >= 70000, { title: "Vezérműszíj + vízpumpa csere", kind: "karbantartás",
+  push(!knownEngine && km >= 70000, { title: "Vezérműszíj + vízpumpa csere", kind: "karbantartás",
     urgency: km >= 120000 ? "esedékes" : "hamarosan",
-    detail: "Típusfüggő 60–120 e km-enként. Elmulasztva a szíj elszakad és TÖNKREMEGY a motor — kérdezz rá, cserélték-e és mikor, kérj számlát.",
+    detail: "Típusfüggő 60–120 e km-enként — és először azt kell tisztázni, hogy ez a motor szíjas-e vagy láncos. Ha szíjas: elmulasztva a szíj elszakad és TÖNKREMEGY a motor. Kérdezz rá, cserélték-e és mikor, kérj számlát.",
     estCost: "kb. 80–250 e Ft" });
-  push(km >= 120000, { title: "Vezérműlánc nyúlása (láncos motoroknál)", kind: "meghibásodás",
+  push(!knownEngine && km >= 120000, { title: "Vezérműlánc nyúlása (láncos motoroknál)", kind: "meghibásodás",
     urgency: km >= 180000 ? "esedékes" : "figyeld",
     detail: "Hidegindításkor csörgő/zörgő hang az árulkodó jel. Sok modellnél 150–250 e km körül jelentkezik, és a javítás motorbontással jár.",
     estCost: "kb. 200–700 e Ft" });

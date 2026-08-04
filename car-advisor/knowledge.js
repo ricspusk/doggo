@@ -207,7 +207,7 @@ const KB_ENGINES = [
     ],
   },
   {
-    m: /\b(1[.,]4|1[.,]6|1[.,]8)\s*(vvt-?i|dual\s*vvt)\b|\bcorolla\b|\bauris\b|\byaris\b/i, name: "Toyota VVT-i benzin",
+    m: /\b(1[.,]4|1[.,]6|1[.,]8|2[.,]0)\s*(vvt-?i|dual\s*vvt|valvematic)\b|\bvalvematic\b|\bcorolla\b|\bauris\b|\byaris\b|\bverso\b|\bavensis\b/i, name: "Toyota VVT-i / Valvematic benzin",
     faults: [
       { title: "Vezérműlánc (a legtöbb VVT-i-nél lánc van)", from: 200000, sev: "mid", cost: "200–500 e Ft",
         detail: "Nagyon hosszú életű, de 250 e km felett érdemes a zajra figyelni." },
