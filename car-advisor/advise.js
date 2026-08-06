@@ -50,8 +50,14 @@ const NEED_RULES = [
     read: "rossz úton / télen is használnád", tags: ["hasmagasság", "összkerék", "hó", "SUV"] },
   { m: /magas [üu]l[ée]|suv|terepj|be[üu]l[ée]s|h[áa]tf[áa]j|k[öo]nnyen be/i,
     read: "magas üléspozíció, könnyű beszállás", tags: ["SUV", "hasmagasság"] },
-  { m: /gyors|er[őo]s|sportos|[éa]lm[ée]ny|j[óo]l vezet/i,
-    read: "vezetési élmény is számít", tags: ["jó vezetés", "gyors"] },
+  /* KÜLÖN kérésként kezeljük a teljesítményt és a vezetési élményt: ezek nem
+     egyszerű címkék, hanem önálló elvárások. Ha valaki leírja, hogy fontos az
+     erő, akkor egy 70 lóerős kisautó akkor sem jó válasz, ha egyébként
+     megbízható — a legördülő „legfontosabb” mező nem nyomhatja el ezt. */
+  { m: /teljes[íi]tm[ée]ny|\ber[őo]s\b|er[őo]sebb|l[óo]er[őo]|\bgyors\b|gyorsul|dinamik|\bnyomat[ée]k|ne legyen lassú|elég ereje/i,
+    read: "fontos a teljesítmény és az erő", tags: ["gyors"], want: "power" },
+  { m: /sportos|vezet[ée]si [ée]lm[ée]ny|j[óo]l vezet|[ée]lvezet|kanyar|menetdinamik|vezetni szeret/i,
+    read: "fontos a vezetési élmény", tags: ["jó vezetés", "sportos"], want: "drive" },
   { m: /\bsz[ée]p\b|diz[áa]jn|\bdesign\b|ne legyen ciki|mutat[óo]s|pr[ée]mium|ig[ée]nyes/i,
     read: "a megjelenés és az anyagminőség is fontos", tags: ["szép", "igényes belső", "prémium"] },
   { m: /csendes|halk|zaj/i, read: "csendes utastér", tags: ["csendes", "kényelmes"] },
@@ -66,12 +72,13 @@ const SEAT_MAP = { "1-2": 2, "3-4": 4, "5": 5, "7": 7 };
 function readFreeText(text) {
   const t = String(text || "");
   const out = { tags: {}, read: [], seats: 0, gearbox: null, noFuel: null,
-                preferFuel: null, usage: null, priority: null };
+                preferFuel: null, usage: null, priority: null, wants: {} };
   if (!t.trim()) return out;
   NEED_RULES.forEach((r) => {
     if (!r.m.test(t)) return;
     out.read.push(r.read);
     (r.tags || []).forEach((tag) => { out.tags[tag] = (out.tags[tag] || 0) + 1; });
+    if (r.want) out.wants[r.want] = true;
     if (r.seats) out.seats = Math.max(out.seats, r.seats);
     if (r.gearbox) out.gearbox = r.gearbox;
     if (r.noFuel) out.noFuel = r.noFuel;
@@ -93,6 +100,7 @@ function buildNeed(d) {
     gearbox: d.gearbox && d.gearbox !== "" ? d.gearbox : ft.gearbox,
     priority: d.priority || ft.priority || "megbízhatóság",
     tags: ft.tags,
+    wants: ft.wants,
     noFuel: ft.noFuel,
     preferFuel: ft.preferFuel,
     read: ft.read,
@@ -100,11 +108,35 @@ function buildNeed(d) {
   };
 }
 
+/* ---- Lóerő: a címkéből olvassuk ki, ha nincs megadva ----
+   Az ajánlás címkéje jellemzően tartalmazza („1.6 TDI CR (110 LE)”); ha nem,
+   a lökettérfogatból és a feltöltésből becsüljük. A becslés a RANGSOROLÁSHOZ
+   elég pontos — nem műszaki adatként közöljük. */
+function pickHp(pick) {
+  if (pick.hp) return pick.hp;
+  const m = String(pick.label).match(/(\d{2,3})\s*LE/i);
+  if (m) return Number(m[1]);
+  const l = String(pick.label);
+  if (pick.fuel === "Elektromos") return 120;
+  if (pick.fuel === "Hibrid") return 130;
+  const d = l.match(/(\d)[.,](\d)/);
+  const disp = d ? Number(d[1] + "." + d[2]) : 1.6;
+  const turbo = /tsi|tdi|tce|t-?gdi|ecoboost|turbo|cdti|hdi|dci|crdi|tdci|thp|boosterjet|dig-?t|multijet|multiair|skyactiv-?d|jtd|d-?4d|cgi|kompressor|bluehdi|tfsi|i-?[cd]tdi|ddis/i.test(l);
+  if (pick.fuel === "Dízel") return Math.round(disp * (turbo ? 78 : 58));
+  return Math.round(disp * (turbo ? 95 : 66));
+}
+
 /* Egy konfiguráció (pick) beleférését és illeszkedését pontozzuk */
 function scorePick(pick, need) {
   if (pick.price[0] > need.budget) return null;      // KEMÉNY korlát: nem fér bele
   if (need.gearbox && pick.gearbox !== need.gearbox) return null;
   if (need.noFuel && pick.fuel === need.noFuel) return null;
+
+  /* ALSÓ KERET-KORLÁT: ha 10 millió a keret, egy 3 milliós autó nem válasz.
+     A `floor` az a hányad, amit a javaslatnak legalább ki kell használnia.
+     A recommend() fokozatosan lazítja, ha másképp nem jönne ki 3 találat. */
+  const mid = (pick.price[0] + pick.price[1]) / 2;
+  if (need.floor && mid < need.floor * need.budget) return null;
 
   let s = 0;
   // Ha a szövegben KIMONDTAD, milyen hajtást szeretnél, az erős jelzés:
@@ -114,14 +146,21 @@ function scorePick(pick, need) {
     else if (need.preferFuel === "Elektromos" && pick.fuel === "Hibrid") s += 8; // közeli kompromisszum
     else s -= 30;
   }
-  // A keret kihasználása: a jó vétel a keret 55–100%-a között van
-  const mid = (pick.price[0] + pick.price[1]) / 2;
+  /* A keret kihasználása. Ez a pontozás legerősebb tényezője, mert enélkül
+     inkonzisztens lesz a javaslat: 10 milliós keretre nem szabad 3 milliós
+     autót ajánlani. Ha viszont kifejezetten az olcsó fenntartás a cél, a
+     büntetést enyhítjük — ott a takarékosság legitim döntés. */
   const use = mid / need.budget;
-  if (use > 1) s += 6;              // a keret az alsó sávra elég — még reális
-  else if (use > 0.7) s += 16;      // pont beleillik
-  else if (use > 0.45) s += 10;
-  else s -= 7;                      // jóval a keret alatt: ha ennyit tudsz költeni,
-                                    // egy fiatalabb, kevesebbet futott darab jobb vétel
+  let bs;
+  if (use > 1.05) bs = 8;           // csak a sáv alja fér bele — még reális, de szűkös
+  else if (use > 0.85) bs = 42;     // pont a keretre lő
+  else if (use > 0.65) bs = 38;
+  else if (use > 0.5) bs = 22;
+  else if (use > 0.4) bs = 4;
+  else bs = -45;                    // jóval a keret alatt: ennyi pénzből jobbat kapsz
+  const wantsCheap = need.priority === "ár" || need.tags["olcsó fenntartás"];
+  if (wantsCheap && bs < 0) bs = bs / 3;
+  s += bs;
 
   // Üzemanyag és éves futás összhangja — ez a leggyakoribb drága hiba
   if (pick.fuel === "Dízel") {
@@ -136,6 +175,13 @@ function scorePick(pick, need) {
     if (need.usage === "városi") s += 10;
   }
   if (pick.fuel === "Benzin" && need.annualKm < 15000) s += 6;
+
+  /* Ha a szövegben kifejezetten kérted az ERŐT, az a motorválasztáson múlik,
+     nem a típuson — ezért itt, a konkrét konfiguráción pontozzuk. */
+  if (need.wants && need.wants.power) {
+    const hp = pickHp(pick);
+    s += Math.max(-35, Math.min(50, (hp - 105) * 0.55));
+  }
   return { pick, s };
 }
 
@@ -173,6 +219,27 @@ function scoreCar(car, need) {
   Object.entries(need.tags).forEach(([tag, w]) => {
     if (carTags.includes(tag)) { s += 11 * w; reasons.push(tagReason(tag)); }
   });
+
+  /* 5b) KÜLÖN KÉRÉSEK a szabad szövegből. Ezek ugyanakkora súlyt kapnak, mint
+     a legördülő „legfontosabb” mező — különben egy leírt igény elveszne. */
+  if (need.wants && need.wants.drive) {
+    let d = 0;
+    if (carTags.includes("sportos")) d += 40;
+    if (carTags.includes("jó vezetés")) d += 30;
+    if (carTags.includes("gyors")) d += 12;
+    if (carTags.includes("prémium")) d += 12;
+    if (!d) d = -20;                      // aki élményt kér, ne kapjon unalmas autót
+    s += d;
+    if (d > 0) reasons.push("Kifejezetten kérted a vezetési élményt — ez a típus ebben a mezőny fölött szól.");
+  }
+  if (need.wants && need.wants.power) {
+    const hp = pickHp(best.pick);
+    if (hp >= 150) reasons.push(`Kérted az erőt: ez a változat ${hp} lóerős, ami ehhez a méret- és súlykategóriához bőven elég.`);
+    /* Őszinte figyelmeztetés, ha az igényeid feszülnek egymásnak. */
+    if (need.priority === "megbízhatóság" && (sc.rel || 3) <= 3) {
+      reasons.push("Fontos: erős autót kértél, de a legfontosabb szempontnak a megbízhatóságot jelölted. Ez a kettő itt feszül egymásnak — az erősebb, sportosabb autókat jellemzően keményebben használják, és a fenntartásuk is drágább.");
+    }
+  }
 
   // 6) Ülésszám
   if (need.seats >= 7 && car.seats >= 7) { s += 22; reasons.push("Hét üléses — ezt kifejezetten kérted."); }
@@ -225,6 +292,24 @@ function tagReason(tag) {
     "gáz": "Gyári gázüzemmel is kapható, alacsony kilométerköltséggel.",
     "papírozott szerviz": "A hosszú gyári garancia miatt gyakori a hiánytalan szerviztörténet.",
     "sok hely hátul": "Kiemelkedően nagy hátsó lábtér.",
+    "kisbusz": "Kisbusz-felépítés: tolóajtók, egyenes padló, magas tető — ennél praktikusabban nem lehet pakolni.",
+    "munka": "Munkára és teherhordásra is alkalmas.",
+    "pickup": "Pickup: platós felépítés, komoly teherbírással és vontatóképességgel.",
+    "terep": "Valódi terepképesség, nem csak magasított karosszéria.",
+    "sportos": "Sportos karakter — a vezetés élménye itt nem mellékes szempont.",
+    "gyors": "Erős motor, komoly gyorsulással.",
+    "technológia": "Modern technika és bőséges digitális felszereltség.",
+    "biztonság": "Kiemelkedő biztonsági felszereltség és töréstesztek.",
+    "felszereltség": "Az árához képest kiugróan gazdag felszereltség.",
+    "tölthető hibrid": "Tölthető hibrid: rövid úton elektromos, hosszún benzines — zöld rendszámmal.",
+    "szívó motor": "Turbó nélküli szívómotor — kevesebb, ami elromolhat.",
+    "jó anyagminőség": "Igényes anyagok és jó összeszerelési minőség.",
+    "egyterű": "Egyterű felépítés: könnyebb beszállás és jobb tér-kihasználás, mint egy SUV-ban.",
+    "kabrió": "Nyitható tetős autó.",
+    "város": "Városi használatra kifejezetten alkalmas.",
+    "sok km": "Magas futásteljesítménnyel is jól bírja.",
+    "sok pénzért nagy autó": "Kiugró méret az árához képest.",
+    "gáz": "Gázüzemmel a kilométerköltség jelentősen alacsonyabb.",
   };
   return m[tag] || null;
 }
@@ -238,7 +323,17 @@ function dedupe(arr) {
 /* A fő függvény: a legjobb 3 javaslat */
 function recommend(d) {
   const need = buildNeed(d);
-  const all = KB_CARS.map((c) => scoreCar(c, need)).filter(Boolean);
+
+  /* A keret alsó korlátját fokozatosan lazítjuk: először csak olyat ajánlunk,
+     ami a keret legalább 45%-át kihasználja. Csak akkor engedünk lejjebb, ha
+     másképp nem jönne ki három javaslat. Így nem fordulhat elő, hogy 10 milliós
+     keretre 3 milliós autót ajánlunk, de szűk kínálatnál sem maradunk üresen. */
+  let all = [];
+  for (const floor of [0.45, 0.3, 0]) {
+    need.floor = floor;
+    all = KB_CARS.map((c) => scoreCar(c, need)).filter(Boolean);
+    if (all.length >= 3) break;
+  }
   all.sort((a, b) => b.score - a.score);
 
   // Ne ajánljunk három ugyanolyan autót: márkánként legfeljebb egyet
@@ -257,7 +352,7 @@ function recommend(d) {
   // hasznosabb a felhasználónak, mint egy üres „nincs találat”.
   let floor = null;
   if (!picked.length) {
-    const relaxed = { ...need, budget: Infinity };
+    const relaxed = { ...need, budget: Infinity, floor: 0 };
     KB_CARS.forEach((c) => {
       if (need.seats >= 7 && c.seats < 7) return;
       c.picks.forEach((p) => {
