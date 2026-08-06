@@ -622,6 +622,612 @@ const FLEET = {
   },
 };
 
+/* ============================================================
+   2025-ÖS MODELLÉV — hajtáslánc-bővítés
+   ------------------------------------------------------------
+   A fenti tábla a 2024-es állapotot fedte le. Ez a blokk hozzáadja
+   az Európában 2025-ben forgalmazott hajtásláncokat:
+     - 48 voltos mild hibrid (MHEV) változatok
+     - új generációs full hibridek (e:HEV, E-Tech, e-Power, 5. gen HSD)
+     - tölthető hibridek (PHEV)
+     - a friss elektromos modellek és akkumulátor-méretek
+   Egyben kiterjeszti a még gyártásban lévő modellek évjárat-sávját.
+   ============================================================ */
+
+const ENGINES_2025 = {
+  /* ----- VW-csoport ----- */
+  "1.0 eTSI (48V)":        [1.0, F_B, 116, [2020, 2026]],
+  "1.5 eTSI (48V)":        [1.5, F_B, 150, [2019, 2026]],
+  "2.0 TSI evo":           [2.0, F_B, 265, [2019, 2026]],
+  "2.0 TDI evo":           [2.0, F_D, 150, [2020, 2026]],
+  "1.4 eHybrid (PHEV)":    [1.4, F_HY, 204, [2020, 2024], F_AUT],
+  "1.5 eHybrid (PHEV)":    [1.5, F_HY, 204, [2024, 2026], F_AUT],
+  "1.5 TSI mHEV":          [1.5, F_B, 150, [2023, 2026]],
+
+  /* ----- Hyundai / Kia ----- */
+  "1.0 T-GDI MHEV (48V)":  [1.0, F_B, 120, [2020, 2026]],
+  "1.5 T-GDI MHEV (48V)":  [1.5, F_B, 160, [2022, 2026]],
+  "1.6 CRDi MHEV (48V)":   [1.6, F_D, 136, [2019, 2026]],
+  "1.6 T-GDI Hybrid":      [1.6, F_HY, 141, [2020, 2026], F_AUT],
+  "1.6 T-GDI PHEV":        [1.6, F_HY, 265, [2020, 2026], F_AUT],
+  "2.0 T-GDI N":           [2.0, F_B, 280, [2017, 2026]],
+  "1.0 T-GDI 48V Bayon":   [1.0, F_B, 100, [2021, 2026]],
+
+  /* ----- Toyota / Lexus ----- */
+  "1.5 Hybrid (5. gen)":   [1.5, F_HY, 116, [2020, 2026], F_AUT],
+  "1.8 Hybrid (5. gen)":   [1.8, F_HY, 140, [2022, 2026], F_AUT],
+  "2.0 Hybrid (5. gen)":   [2.0, F_HY, 196, [2022, 2026], F_AUT],
+  "2.5 Plug-in Hybrid":    [2.5, F_HY, 306, [2020, 2026], F_AUT],
+
+  /* ----- Renault / Dacia / Nissan ----- */
+  "1.2 E-Tech Hybrid":     [1.2, F_HY, 160, [2024, 2026], F_AUT],
+  "1.6 E-Tech Hybrid":     [1.6, F_HY, 145, [2020, 2026], F_AUT],
+  "1.3 TCe MHEV (48V)":    [1.3, F_B, 160, [2022, 2026]],
+  "1.2 TCe MHEV (48V)":    [1.2, F_B, 130, [2024, 2026]],
+  "1.6 Hybrid 140":        [1.6, F_HY, 140, [2022, 2026], F_AUT],
+  "1.0 TCe ECO-G (LPG)":   [1.0, F_LPG, 100, [2019, 2026]],
+  "1.5 e-Power":           [1.5, F_HY, 190, [2021, 2026], F_AUT],
+  "1.3 DIG-T MHEV":        [1.3, F_B, 158, [2021, 2026]],
+
+  /* ----- Stellantis (Peugeot, Citroën, Opel, Fiat, Jeep, Alfa) ----- */
+  "1.2 PureTech Hybrid":   [1.2, F_HY, 145, [2023, 2026], F_AUT],
+  "1.6 PHEV":              [1.6, F_HY, 225, [2019, 2026], F_AUT],
+  "1.5 BlueHDi 130":       [1.5, F_D, 130, [2018, 2026]],
+  "1.3 MultiJet MHEV":     [1.3, F_B, 130, [2020, 2026]],
+
+  /* ----- Ford ----- */
+  "1.0 EcoBoost mHEV":     [1.0, F_B, 155, [2020, 2026]],
+  "2.5 Duratec Hybrid":    [2.5, F_HY, 190, [2019, 2026], F_AUT],
+  "2.5 Duratec PHEV":      [2.5, F_HY, 225, [2020, 2026], F_AUT],
+
+  /* ----- BMW / Mini ----- */
+  "B48 TU benzin (2.0)":   [2.0, F_B, 204, [2021, 2026]],
+  "B47 TU dízel (2.0)":    [2.0, F_D, 197, [2020, 2026]],
+  "B58 TU benzin (3.0)":   [3.0, F_B, 381, [2019, 2026]],
+
+  /* ----- Mercedes ----- */
+  "M254 (2.0 turbó 48V)":  [2.0, F_B, 258, [2021, 2026]],
+  "OM654M (2.0 d 48V)":    [2.0, F_D, 265, [2020, 2026]],
+
+  /* ----- Volvo ----- */
+  "B3/B4 (48V benzin)":    [2.0, F_B, 197, [2020, 2026]],
+  "B5 (48V benzin)":       [2.0, F_B, 250, [2020, 2026]],
+  "T6/T8 PHEV":            [2.0, F_HY, 350, [2019, 2026], F_AUT],
+
+  /* ----- Japán / kínai gyártók ----- */
+  "1.2 Dualjet Hybrid":    [1.2, F_HY, 83,  [2020, 2026]],
+  "1.4 BoosterJet MHEV":   [1.4, F_B, 129, [2018, 2026]],
+  "1.5 e:HEV":             [1.5, F_HY, 131, [2020, 2026], F_AUT],
+  "2.0 e:HEV":             [2.0, F_HY, 184, [2019, 2026], F_AUT],
+  "2.0 e-Skyactiv G MHEV": [2.0, F_B, 150, [2019, 2026]],
+  "2.5 e-Skyactiv PHEV":   [2.5, F_HY, 327, [2022, 2026], F_AUT],
+  "3.3 e-Skyactiv D":      [3.3, F_D, 254, [2022, 2026]],
+  "1.5 Hybrid+":           [1.5, F_HY, 194, [2023, 2026], F_AUT],
+  "1.6 PHEV MG":           [1.6, F_HY, 258, [2020, 2026], F_AUT],
+
+  /* ----- Elektromos: friss akkumulátor-méretek ----- */
+  "48 kWh elektromos":     [0, F_EV, 156, [2023, 2026], F_AUT],
+  "51 kWh elektromos":     [0, F_EV, 156, [2023, 2026], F_AUT],
+  "54 kWh elektromos":     [0, F_EV, 156, [2023, 2026], F_AUT],
+  "60 kWh elektromos":     [0, F_EV, 220, [2022, 2026], F_AUT],
+  "63 kWh elektromos":     [0, F_EV, 204, [2023, 2026], F_AUT],
+  "65 kWh elektromos":     [0, F_EV, 218, [2023, 2026], F_AUT],
+  "66 kWh elektromos":     [0, F_EV, 313, [2022, 2026], F_AUT],
+  "69 kWh elektromos":     [0, F_EV, 272, [2023, 2026], F_AUT],
+  "71 kWh elektromos":     [0, F_EV, 218, [2022, 2026], F_AUT],
+  "73 kWh elektromos":     [0, F_EV, 213, [2023, 2026], F_AUT],
+  "79 kWh elektromos":     [0, F_EV, 286, [2023, 2026], F_AUT],
+  "82 kWh elektromos":     [0, F_EV, 231, [2021, 2026], F_AUT],
+  "84 kWh elektromos":     [0, F_EV, 340, [2022, 2026], F_AUT],
+  "86 kWh elektromos":     [0, F_EV, 286, [2023, 2026], F_AUT],
+  "87 kWh elektromos":     [0, F_EV, 220, [2024, 2026], F_AUT],
+  "89 kWh elektromos":     [0, F_EV, 292, [2021, 2026], F_AUT],
+  "99 kWh elektromos":     [0, F_EV, 384, [2023, 2026], F_AUT],
+};
+
+/* Modellenként: [évjárat-sáv 2025-re kiterjesztve, hozzáadandó motorkódok] */
+const FLEET_2025 = {
+  "Volkswagen": {
+    "Polo":     [[1997, 2026], "1.0 TSI|1.0 eTSI (48V)"],
+    "Golf":     [[1997, 2026], "1.0 eTSI (48V)|1.5 eTSI (48V)|1.5 TSI mHEV|2.0 TSI evo|2.0 TDI evo|1.4 eHybrid (PHEV)|1.5 eHybrid (PHEV)"],
+    "Passat":   [[1973, 2026], "1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.5 eHybrid (PHEV)"],
+    "Arteon":   [[2017, 2025], "1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo"],
+    "Touran":   [[2003, 2026], "1.5 eTSI (48V)|2.0 TDI evo"],
+    "T-Cross":  [[2019, 2026], "1.0 TSI|1.5 eTSI (48V)"],
+    "T-Roc":    [[2017, 2026], "1.0 TSI|1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo"],
+    "Taigo":    [[2021, 2026], "1.0 TSI|1.5 eTSI (48V)"],
+    "Tiguan":   [[2007, 2026], "1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.5 eHybrid (PHEV)"],
+    "Tayron":   [[2024, 2026], "1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.5 eHybrid (PHEV)"],
+    "Touareg":  [[2002, 2026], "3.0 TDI"],
+    "Caddy":    [[2004, 2026], "1.5 TSI|2.0 TDI evo"],
+    "Transporter": [[2003, 2026], "2.0 TDI evo|77 kWh elektromos"],
+    "ID.3":     [[2020, 2026], "58 kWh elektromos|63 kWh elektromos|77 kWh elektromos|79 kWh elektromos"],
+    "ID.4":     [[2021, 2026], "52 kWh elektromos|77 kWh elektromos|79 kWh elektromos"],
+    "ID.5":     [[2022, 2026], "77 kWh elektromos|79 kWh elektromos"],
+    "ID.7":     [[2023, 2026], "77 kWh elektromos|86 kWh elektromos"],
+  },
+  "Škoda": {
+    "Fabia":    [[2000, 2026], "1.0 TSI"],
+    "Scala":    [[2019, 2026], "1.0 TSI|1.5 TSI"],
+    "Octavia":  [[1997, 2026], "1.0 eTSI (48V)|1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.5 eHybrid (PHEV)"],
+    "Superb":   [[2001, 2026], "1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.5 eHybrid (PHEV)"],
+    "Kamiq":    [[2019, 2026], "1.0 TSI|1.5 TSI"],
+    "Karoq":    [[2017, 2026], "1.5 TSI|2.0 TSI evo|2.0 TDI evo"],
+    "Kodiaq":   [[2016, 2026], "1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.5 eHybrid (PHEV)"],
+    "Enyaq":    [[2021, 2026], "58 kWh elektromos|63 kWh elektromos|77 kWh elektromos|79 kWh elektromos"],
+    "Elroq":    [[2024, 2026], "51 kWh elektromos|63 kWh elektromos|77 kWh elektromos"],
+  },
+  "Seat": {
+    "Ibiza":    [[1997, 2026], "1.0 TSI|1.5 TSI"],
+    "Arona":    [[2017, 2026], "1.0 TSI|1.5 TSI"],
+    "Leon":     [[1999, 2026], "1.0 eTSI (48V)|1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.5 eHybrid (PHEV)"],
+    "Ateca":    [[2016, 2026], "1.5 TSI|2.0 TSI evo|2.0 TDI evo"],
+    "Tarraco":  [[2018, 2026], "1.5 TSI|2.0 TSI evo|2.0 TDI evo|1.4 eHybrid (PHEV)"],
+  },
+  "Cupra": {
+    "Leon":       [[2018, 2026], "1.5 eTSI (48V)|2.0 TSI evo|1.5 eHybrid (PHEV)"],
+    "Formentor":  [[2020, 2026], "1.5 eTSI (48V)|2.0 TSI evo|1.5 eHybrid (PHEV)"],
+    "Terramar":   [[2024, 2026], "1.5 eTSI (48V)|2.0 TSI evo|1.5 eHybrid (PHEV)"],
+    "Born":       [[2021, 2026], "58 kWh elektromos|77 kWh elektromos|79 kWh elektromos"],
+    "Tavascan":   [[2024, 2026], "77 kWh elektromos|79 kWh elektromos"],
+  },
+  "Audi": {
+    "A1":  [[2010, 2026], "1.0 TSI|1.5 TSI"],
+    "A3":  [[1996, 2026], "1.0 eTSI (48V)|1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.4 eHybrid (PHEV)"],
+    "A4":  [[1995, 2026], "2.0 TSI evo|2.0 TDI evo"],
+    "A5":  [[2007, 2026], "2.0 TSI evo|2.0 TDI evo"],
+    "A6":  [[1997, 2026], "2.0 TSI evo|2.0 TDI evo|3.0 TDI"],
+    "Q2":  [[2016, 2026], "1.0 TSI|1.5 TSI|2.0 TDI evo"],
+    "Q3":  [[2011, 2026], "1.5 eTSI (48V)|2.0 TSI evo|2.0 TDI evo|1.4 eHybrid (PHEV)"],
+    "Q5":  [[2008, 2026], "2.0 TSI evo|2.0 TDI evo|3.0 TDI"],
+    "Q4 e-tron": [[2021, 2026], "52 kWh elektromos|77 kWh elektromos|79 kWh elektromos"],
+    "Q8 e-tron": [[2019, 2026], "89 kWh elektromos|99 kWh elektromos"],
+  },
+  "BMW": {
+    "1-es": [[2004, 2026], "B48 TU benzin (2.0)|B47 TU dízel (2.0)"],
+    "2-es": [[2014, 2026], "B48 TU benzin (2.0)|B58 TU benzin (3.0)|B47 TU dízel (2.0)"],
+    "3-as": [[1998, 2026], "B48 TU benzin (2.0)|B58 TU benzin (3.0)|B47 TU dízel (2.0)"],
+    "4-es": [[2013, 2026], "B48 TU benzin (2.0)|B58 TU benzin (3.0)|B47 TU dízel (2.0)"],
+    "5-ös": [[1996, 2026], "B48 TU benzin (2.0)|B58 TU benzin (3.0)|B47 TU dízel (2.0)"],
+    "X1":   [[2009, 2026], "B48 TU benzin (2.0)|B47 TU dízel (2.0)"],
+    "X3":   [[2003, 2026], "B48 TU benzin (2.0)|B58 TU benzin (3.0)|B47 TU dízel (2.0)"],
+    "iX1":  [[2022, 2026], "66 kWh elektromos"],
+    "i4":   [[2021, 2026], "84 kWh elektromos"],
+    "i5":   [[2023, 2026], "84 kWh elektromos"],
+    "iX":   [[2021, 2026], "77 kWh elektromos|99 kWh elektromos"],
+  },
+  "Mercedes": {
+    "A-osztály": [[1997, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "B-osztály": [[2005, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "C-osztály": [[2000, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "E-osztály": [[2002, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "CLA":       [[2013, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "GLA":       [[2013, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "GLB":       [[2019, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "GLC":       [[2015, 2026], "M254 (2.0 turbó 48V)|OM654M (2.0 d 48V)"],
+    "EQA":       [[2021, 2026], "66 kWh elektromos|69 kWh elektromos"],
+    "EQB":       [[2021, 2026], "66 kWh elektromos|69 kWh elektromos"],
+    "EQE":       [[2022, 2026], "89 kWh elektromos"],
+  },
+  "Toyota": {
+    "Aygo X":       [[2022, 2026], "1.0 VVT-i|1.5 Hybrid (5. gen)"],
+    "Yaris":        [[1999, 2026], "1.5 Hybrid (5. gen)"],
+    "Yaris Cross":  [[2021, 2026], "1.5 Hybrid (5. gen)"],
+    "Corolla":      [[1997, 2026], "1.8 Hybrid (5. gen)|2.0 Hybrid (5. gen)"],
+    "Corolla Cross":[[2022, 2026], "1.8 Hybrid (5. gen)|2.0 Hybrid (5. gen)"],
+    "C-HR":         [[2016, 2026], "1.8 Hybrid (5. gen)|2.0 Hybrid (5. gen)|2.0 Hybrid (5. gen)"],
+    "RAV4":         [[2000, 2026], "2.5 Hybrid|2.5 Plug-in Hybrid"],
+    "Camry":        [[2019, 2026], "2.5 Hybrid"],
+    "bZ4X":         [[2022, 2026], "71 kWh elektromos"],
+    "Hilux":        [[2005, 2026], "2.8 D-4D"],
+    "Land Cruiser": [[2003, 2026], "2.8 D-4D"],
+  },
+  "Lexus": {
+    "UX": [[2019, 2026], "2.0 Hybrid (5. gen)|71 kWh elektromos"],
+    "NX": [[2014, 2026], "2.5 Hybrid|2.5 Plug-in Hybrid"],
+    "RX": [[2003, 2026], "2.5 Hybrid|2.5 Plug-in Hybrid"],
+    "ES": [[2018, 2026], "2.5 Hybrid"],
+  },
+  "Hyundai": {
+    "i10":      [[2008, 2026], "1.2 Kappa|1.0 T-GDI"],
+    "i20":      [[2008, 2026], "1.0 T-GDI MHEV (48V)"],
+    "i30":      [[2007, 2026], "1.0 T-GDI MHEV (48V)|1.5 T-GDI MHEV (48V)|1.6 CRDi MHEV (48V)|2.0 T-GDI N"],
+    "Bayon":    [[2021, 2026], "1.0 T-GDI 48V Bayon|1.2 Kappa"],
+    "Kona":     [[2017, 2026], "1.0 T-GDI MHEV (48V)|1.6 T-GDI Hybrid|48 kWh elektromos|65 kWh elektromos"],
+    "Tucson":   [[2004, 2026], "1.6 T-GDI MHEV (48V)|1.6 T-GDI Hybrid|1.6 T-GDI PHEV|1.6 CRDi MHEV (48V)"],
+    "Santa Fe": [[2001, 2026], "1.6 T-GDI Hybrid|1.6 T-GDI PHEV|2.2 CRDi"],
+    "Ioniq 5":  [[2021, 2026], "58 kWh elektromos|63 kWh elektromos|77 kWh elektromos|84 kWh elektromos"],
+    "Ioniq 6":  [[2022, 2026], "53 kWh elektromos|77 kWh elektromos"],
+  },
+  "Kia": {
+    "Picanto":  [[2004, 2026], "1.0 T-GDI|1.2 Kappa"],
+    "Rio":      [[2005, 2024], "1.0 T-GDI MHEV (48V)"],
+    "Ceed":     [[2006, 2026], "1.0 T-GDI MHEV (48V)|1.5 T-GDI MHEV (48V)|1.6 CRDi MHEV (48V)"],
+    "XCeed":    [[2019, 2026], "1.0 T-GDI MHEV (48V)|1.5 T-GDI MHEV (48V)|1.6 T-GDI PHEV"],
+    "Stonic":   [[2017, 2026], "1.0 T-GDI MHEV (48V)"],
+    "Sportage": [[2004, 2026], "1.6 T-GDI MHEV (48V)|1.6 T-GDI Hybrid|1.6 T-GDI PHEV|1.6 CRDi MHEV (48V)"],
+    "Sorento":  [[2002, 2026], "1.6 T-GDI Hybrid|1.6 T-GDI PHEV|2.2 CRDi"],
+    "Niro":     [[2016, 2026], "1.6 GDI Hybrid|1.6 T-GDI PHEV|65 kWh elektromos"],
+    "EV3":      [[2024, 2026], "58 kWh elektromos|81 kWh elektromos"],
+    "EV6":      [[2021, 2026], "63 kWh elektromos|77 kWh elektromos|84 kWh elektromos"],
+    "EV9":      [[2023, 2026], "99 kWh elektromos"],
+  },
+  "Renault": {
+    "Clio":      [[1998, 2026], "1.0 TCe ECO-G (LPG)|1.3 TCe MHEV (48V)|1.6 E-Tech Hybrid"],
+    "Captur":    [[2013, 2026], "1.0 TCe ECO-G (LPG)|1.3 TCe MHEV (48V)|1.6 E-Tech Hybrid"],
+    "Symbioz":   [[2024, 2026], "1.6 E-Tech Hybrid"],
+    "Arkana":    [[2021, 2026], "1.3 TCe MHEV (48V)|1.6 E-Tech Hybrid"],
+    "Austral":   [[2022, 2026], "1.2 E-Tech Hybrid|1.3 TCe MHEV (48V)"],
+    "Rafale":    [[2023, 2026], "1.2 E-Tech Hybrid"],
+    "Espace":    [[2002, 2026], "1.2 E-Tech Hybrid"],
+    "Mégane":    [[1999, 2026], "1.3 TCe MHEV (48V)|1.6 E-Tech Hybrid|60 kWh elektromos"],
+    "Scénic":    [[1999, 2026], "60 kWh elektromos|87 kWh elektromos"],
+    "R5 E-Tech": [[2024, 2026], "40 kWh elektromos|52 kWh elektromos"],
+    "Zoe":       [[2013, 2024], "52 kWh elektromos"],
+    "Kangoo":    [[2001, 2026], "1.3 TCe MHEV (48V)|1.5 dCi|45 kWh elektromos"],
+    "Trafic":    [[2001, 2026], "2.0 dCi"],
+  },
+  "Dacia": {
+    "Sandero":  [[2008, 2026], "1.0 TCe ECO-G (LPG)|1.0 SCe|1.2 TCe MHEV (48V)"],
+    "Duster":   [[2010, 2026], "1.0 TCe ECO-G (LPG)|1.2 TCe MHEV (48V)|1.6 Hybrid 140"],
+    "Jogger":   [[2022, 2026], "1.0 TCe ECO-G (LPG)|1.6 Hybrid 140"],
+    "Bigster":  [[2025, 2026], "1.2 TCe MHEV (48V)|1.6 Hybrid 140"],
+    "Spring":   [[2021, 2026], "26,8 kWh elektromos"],
+  },
+  "Peugeot": {
+    "208":   [[2012, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|51 kWh elektromos|54 kWh elektromos"],
+    "2008":  [[2013, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|51 kWh elektromos|54 kWh elektromos"],
+    "308":   [[2007, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|1.6 PHEV|54 kWh elektromos"],
+    "408":   [[2022, 2026], "1.2 PureTech Hybrid|1.6 PHEV|73 kWh elektromos"],
+    "3008":  [[2008, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|1.6 PHEV|73 kWh elektromos|82 kWh elektromos"],
+    "5008":  [[2009, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|73 kWh elektromos|82 kWh elektromos"],
+    "Partner / Rifter": [[2002, 2026], "1.5 BlueHDi 130|54 kWh elektromos"],
+  },
+  "Citroën": {
+    "C3":          [[2002, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|44 kWh elektromos"],
+    "C3 Aircross": [[2017, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|44 kWh elektromos"],
+    "C4":          [[2004, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|51 kWh elektromos|54 kWh elektromos"],
+    "C5 Aircross": [[2018, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|1.6 PHEV|73 kWh elektromos"],
+    "Berlingo":    [[2002, 2026], "1.5 BlueHDi 130|54 kWh elektromos"],
+  },
+  "Opel": {
+    "Corsa":      [[2000, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|51 kWh elektromos|54 kWh elektromos"],
+    "Astra":      [[1998, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|1.6 PHEV|54 kWh elektromos"],
+    "Mokka":      [[2012, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|51 kWh elektromos|54 kWh elektromos"],
+    "Crossland":  [[2017, 2024], "1.2 PureTech Hybrid"],
+    "Frontera":   [[2024, 2026], "1.2 PureTech Hybrid|44 kWh elektromos"],
+    "Grandland":  [[2017, 2026], "1.2 PureTech Hybrid|1.5 BlueHDi 130|1.6 PHEV|73 kWh elektromos|82 kWh elektromos"],
+    "Combo":      [[2001, 2026], "1.5 BlueHDi 130|54 kWh elektromos"],
+  },
+  "Fiat": {
+    "500":          [[2007, 2026], "1.0 FireFly Hybrid|42 kWh elektromos"],
+    "Grande Panda": [[2024, 2026], "1.2 PureTech Hybrid|44 kWh elektromos"],
+    "600":          [[2023, 2026], "1.2 PureTech Hybrid|54 kWh elektromos"],
+    "Tipo":         [[2016, 2026], "1.5 BlueHDi 130|1.3 MultiJet MHEV"],
+  },
+  "Alfa Romeo": {
+    "Junior":  [[2024, 2026], "1.2 PureTech Hybrid|54 kWh elektromos"],
+    "Tonale":  [[2022, 2026], "1.5 BlueHDi 130|1.3 MultiJet MHEV|1.6 PHEV"],
+    "Giulia":  [[2016, 2026], "2.0 TSI evo"],
+    "Stelvio": [[2017, 2026], "2.0 TSI evo"],
+  },
+  "Jeep": {
+    "Avenger":  [[2023, 2026], "1.2 PureTech Hybrid|54 kWh elektromos"],
+    "Renegade": [[2014, 2026], "1.3 MultiJet MHEV|1.6 PHEV"],
+    "Compass":  [[2006, 2026], "1.3 MultiJet MHEV|1.6 PHEV|54 kWh elektromos"],
+  },
+  "Ford": {
+    "Puma":     [[2019, 2026], "1.0 EcoBoost mHEV|43 kWh elektromos"],
+    "Focus":    [[1998, 2026], "1.0 EcoBoost mHEV"],
+    "Kuga":     [[2008, 2026], "1.0 EcoBoost mHEV|2.5 Duratec Hybrid|2.5 Duratec PHEV"],
+    "Explorer": [[2024, 2026], "52 kWh elektromos|77 kWh elektromos"],
+    "Capri":    [[2024, 2026], "52 kWh elektromos|77 kWh elektromos"],
+    "Ranger":   [[2011, 2026], "2.0 EcoBlue"],
+    "Transit / Tourneo Custom": [[2012, 2026], "2.0 EcoBlue|64 kWh elektromos"],
+    "Tourneo Courier": [[2023, 2026], "1.0 EcoBoost mHEV|43 kWh elektromos"],
+  },
+  "Nissan": {
+    "Micra":   [[2003, 2026], "1.0 SCe|40 kWh elektromos"],
+    "Juke":    [[2010, 2026], "1.0 T-GDI|1.5 e-Power"],
+    "Qashqai": [[2007, 2026], "1.3 DIG-T MHEV|1.5 e-Power"],
+    "X-Trail": [[2001, 2026], "1.5 e-Power|1.3 DIG-T MHEV"],
+    "Ariya":   [[2022, 2026], "63 kWh elektromos|87 kWh elektromos"],
+    "Leaf":    [[2011, 2026], "40 kWh elektromos|62 kWh elektromos"],
+  },
+  "Honda": {
+    "Jazz":  [[2002, 2026], "1.5 e:HEV"],
+    "Civic": [[2001, 2026], "2.0 e:HEV"],
+    "HR-V":  [[2015, 2026], "1.5 e:HEV"],
+    "ZR-V":  [[2023, 2026], "2.0 e:HEV"],
+    "CR-V":  [[2002, 2026], "2.0 e:HEV"],
+  },
+  "Mazda": {
+    "2":     [[2003, 2026], "1.5 Skyactiv-G|1.5 Hybrid (5. gen)"],
+    "3":     [[2003, 2026], "2.0 e-Skyactiv G MHEV"],
+    "CX-30": [[2019, 2026], "2.0 e-Skyactiv G MHEV"],
+    "CX-5":  [[2012, 2026], "2.0 e-Skyactiv G MHEV|2.2 Skyactiv-D"],
+    "CX-60": [[2022, 2026], "3.3 e-Skyactiv D|2.5 e-Skyactiv PHEV"],
+    "MX-30": [[2020, 2026], "35 kWh elektromos"],
+    "MX-5":  [[1998, 2026], "1.5 Skyactiv-G|2.0 Skyactiv-G"],
+  },
+  "Suzuki": {
+    "Swift":   [[2005, 2026], "1.2 Dualjet Hybrid"],
+    "Ignis":   [[2000, 2026], "1.2 Dualjet Hybrid"],
+    "Vitara":  [[1988, 2026], "1.4 BoosterJet MHEV|1.5 Hybrid (5. gen)"],
+    "S-Cross": [[2013, 2026], "1.4 BoosterJet MHEV|1.5 Hybrid (5. gen)"],
+    "Across":  [[2020, 2025], "2.5 Plug-in Hybrid"],
+    "Jimny":   [[1998, 2026], "1.5 benzin"],
+  },
+  "Volvo": {
+    "S60 / V60": [[2010, 2026], "B3/B4 (48V benzin)|B5 (48V benzin)|T6/T8 PHEV"],
+    "XC40":      [[2017, 2026], "B3/B4 (48V benzin)|T6/T8 PHEV|69 kWh elektromos|82 kWh elektromos"],
+    "XC60":      [[2008, 2026], "B3/B4 (48V benzin)|B5 (48V benzin)|T6/T8 PHEV"],
+    "XC90":      [[2002, 2026], "B5 (48V benzin)|T6/T8 PHEV"],
+    "EX30":      [[2023, 2026], "51 kWh elektromos|69 kWh elektromos"],
+    "EC40 / EX40": [[2023, 2026], "69 kWh elektromos|82 kWh elektromos"],
+  },
+  "MG": {
+    "MG3":  [[2024, 2026], "1.5 Hybrid+"],
+    "ZS":   [[2019, 2026], "1.5 Hybrid+|51 kWh elektromos"],
+    "HS":   [[2019, 2026], "1.5 TSI|1.6 PHEV MG"],
+    "MG4":  [[2022, 2026], "51 kWh elektromos|64 kWh elektromos"],
+    "MG5":  [[2021, 2026], "61 kWh elektromos"],
+  },
+  "BYD": {
+    "Dolphin": [[2023, 2026], "45 kWh elektromos|60 kWh elektromos"],
+    "Atto 3":  [[2022, 2026], "60 kWh elektromos"],
+    "Seal":    [[2023, 2026], "61 kWh elektromos|82 kWh elektromos"],
+    "Seal U":  [[2024, 2026], "71 kWh elektromos|87 kWh elektromos"],
+  },
+  "Tesla": {
+    "Model 3": [[2017, 2026], "Standard Range|Long Range AWD|Performance"],
+    "Model Y": [[2020, 2026], "Standard Range|Long Range AWD|Performance"],
+  },
+  "Mitsubishi": {
+    "ASX":           [[2010, 2026], "1.3 TCe MHEV (48V)|1.6 E-Tech Hybrid"],
+    "Colt":          [[2004, 2026], "1.0 SCe|1.6 E-Tech Hybrid"],
+    "Eclipse Cross": [[2017, 2026], "2.4 PHEV"],
+    "Outlander":     [[2003, 2026], "2.4 PHEV"],
+  },
+  "Mini": {
+    "Cooper":     [[2001, 2026], "B48 TU benzin (2.0)|54 kWh elektromos|66 kWh elektromos"],
+    "Countryman": [[2010, 2026], "B48 TU benzin (2.0)|66 kWh elektromos"],
+    "Aceman":     [[2024, 2026], "54 kWh elektromos|66 kWh elektromos"],
+  },
+};
+
+/* További akkumulátor-méretek, amiket a fenti modellek hivatkoznak */
+ENGINES_2025["35 kWh elektromos"] = [0, F_EV, 145, [2020, 2026], F_AUT];
+ENGINES_2025["43 kWh elektromos"] = [0, F_EV, 168, [2023, 2026], F_AUT];
+ENGINES_2025["44 kWh elektromos"] = [0, F_EV, 113, [2023, 2026], F_AUT];
+ENGINES_2025["45 kWh elektromos"] = [0, F_EV, 122, [2021, 2026], F_AUT];
+ENGINES_2025["53 kWh elektromos"] = [0, F_EV, 151, [2022, 2026], F_AUT];
+ENGINES_2025["61 kWh elektromos"] = [0, F_EV, 204, [2021, 2026], F_AUT];
+ENGINES_2025["64 kWh elektromos"] = [0, F_EV, 204, [2018, 2026], F_AUT];
+ENGINES_2025["81 kWh elektromos"] = [0, F_EV, 204, [2024, 2026], F_AUT];
+ENGINES_2025["1.6 T-GDI MHEV (48V)"] = [1.6, F_B, 180, [2021, 2026]];
+ENGINES_2025["1.0 FireFly Hybrid"] = [1.0, F_HY, 70, [2020, 2026]];
+
+/* ----- Hyundai/Kia szívó benzinesek és további változatok ----- */
+ENGINES_2025["1.5 DPi"]              = [1.5, F_B, 110, [2020, 2026]];
+ENGINES_2025["1.6 MPi"]              = [1.6, F_B, 123, [2010, 2026]];
+ENGINES_2025["1.2 MPi"]              = [1.2, F_B, 84,  [2011, 2026]];
+ENGINES_2025["1.0 T-GDI 48V (100 LE)"] = [1.0, F_B, 100, [2020, 2026]];
+ENGINES_2025["1.6 GDI PHEV"]         = [1.6, F_HY, 265, [2019, 2026], F_AUT];
+ENGINES_2025["2.5 T-GDI"]            = [2.5, F_B, 281, [2020, 2026]];
+ENGINES_2025["2.2 CRDi (4. gen)"]    = [2.2, F_D, 199, [2018, 2026]];
+
+/* ----- NÉMET TÖLTHETŐ HIBRIDEK (PHEV) ----- */
+ENGINES_2025["2.0 TFSI e (PHEV)"]    = [2.0, F_HY, 299, [2019, 2026], F_AUT];
+ENGINES_2025["3.0 TFSI e (PHEV)"]    = [3.0, F_HY, 462, [2019, 2026], F_AUT];
+ENGINES_2025["B48 PHEV (xDrive25e/30e)"] = [2.0, F_HY, 292, [2019, 2026], F_AUT];
+ENGINES_2025["B58 PHEV (45e/545e)"]  = [3.0, F_HY, 394, [2019, 2026], F_AUT];
+ENGINES_2025["B38 PHEV (225xe/330e)"] = [1.5, F_HY, 220, [2015, 2026], F_AUT];
+ENGINES_2025["M254 PHEV (300e)"]     = [2.0, F_HY, 313, [2019, 2026], F_AUT];
+ENGINES_2025["OM654 PHEV (300de)"]   = [2.0, F_HY, 306, [2019, 2026], F_AUT];
+ENGINES_2025["M264 PHEV (250e)"]     = [1.3, F_HY, 218, [2019, 2026], F_AUT];
+ENGINES_2025["2.0 TSI GTE (PHEV)"]   = [2.0, F_HY, 245, [2014, 2026], F_AUT];
+ENGINES_2025["3.0 V6 PHEV"]          = [3.0, F_HY, 462, [2017, 2026], F_AUT];
+
+/* ----- További európai motorok, amik eddig kimaradtak ----- */
+ENGINES_2025["1.0 EcoBoost Hybrid"]  = [1.0, F_HY, 125, [2020, 2026]];
+ENGINES_2025["1.6 Ti-VCT Hybrid"]    = [1.6, F_HY, 125, [2019, 2026], F_AUT];
+ENGINES_2025["1.2 TSI evo"]          = [1.2, F_B, 116, [2023, 2026]];
+ENGINES_2025["1.6 THP PHEV"]         = [1.6, F_HY, 300, [2019, 2026], F_AUT];
+ENGINES_2025["2.0 Skyactiv-X"]       = [2.0, F_B, 186, [2019, 2026]];
+ENGINES_2025["1.8 Hybrid (PHEV)"]    = [1.8, F_HY, 122, [2012, 2026], F_AUT];
+ENGINES_2025["1.5 TSI evo2 (mHEV)"]  = [1.5, F_B, 150, [2022, 2026]];
+ENGINES_2025["1.5 Blue dCi"]         = [1.5, F_D, 115, [2018, 2026]];
+ENGINES_2025["2.0 Blue dCi"]         = [2.0, F_D, 170, [2018, 2026]];
+ENGINES_2025["1.6 BlueHDi 100"]      = [1.6, F_D, 100, [2013, 2026]];
+ENGINES_2025["2.2 BlueHDi"]          = [2.2, F_D, 165, [2016, 2026]];
+ENGINES_2025["1.5 T-GDI Hybrid"]     = [1.5, F_HY, 141, [2023, 2026], F_AUT];
+ENGINES_2025["1.6 CRDi 136"]         = [1.6, F_D, 136, [2015, 2026]];
+ENGINES_2025["2.0 TDI 200"]          = [2.0, F_D, 200, [2020, 2026]];
+ENGINES_2025["1.6 dCi 130"]          = [1.6, F_D, 130, [2011, 2022]];
+ENGINES_2025["2.0 BlueHDi 180"]      = [2.0, F_D, 177, [2017, 2026]];
+
+/* Motorok, amelyek 2025-ben is gyártásban vannak: a gyártási sáv végét
+   kitoljuk 2026-ig. SZÁNDÉKOSAN tételes a lista — blanket-kiterjesztéssel
+   nem létező párosítások jönnének létre (pl. 1.9 PD TDI egy 2025-ös Golfban). */
+const STILL_MADE_2026 = [
+  "1.0 TSI", "1.5 TSI", "2.0 TSI", "2.0 TDI", "3.0 TDI",
+  "1.0 VVT-i", "2.5 Hybrid", "2.8 D-4D", "1.8 Hybrid",
+  "1.2 Kappa", "1.0 T-GDI", "1.6 GDI Hybrid", "2.2 CRDi",
+  "1.0 SCe", "1.5 dCi", "2.0 dCi", "1.3 TCe",
+  "2.0 EcoBlue", "1.5 Skyactiv-G", "2.0 Skyactiv-G", "2.2 Skyactiv-D",
+  "1.5 benzin", "1.4 BoosterJet", "2.4 PHEV",
+  "Standard Range", "Long Range AWD", "Performance",
+  "26,8 kWh elektromos", "40 kWh elektromos", "42 kWh elektromos",
+  "50 kWh elektromos", "52 kWh elektromos", "58 kWh elektromos",
+  "62 kWh elektromos", "64 kWh elektromos", "77 kWh elektromos",
+];
+
+/* Második kör: a fenti motorok hozzárendelése a modellekhez.
+   Külön blokk, hogy a fő tábla olvasható maradjon; ugyanaz a merge fut rá. */
+const FLEET_2025_B = {
+  "Hyundai": {
+    "i20":      [[2008, 2026], "1.2 MPi|1.0 T-GDI 48V (100 LE)"],
+    "i30":      [[2007, 2026], "1.5 DPi|1.6 MPi|1.6 CRDi 136"],
+    "Bayon":    [[2021, 2026], "1.2 MPi|1.0 T-GDI 48V (100 LE)"],
+    "Kona":     [[2017, 2026], "1.6 GDI PHEV|1.0 T-GDI 48V (100 LE)"],
+    "Tucson":   [[2004, 2026], "1.6 GDI PHEV|2.0 CRDi"],
+    "Santa Fe": [[2001, 2026], "1.6 GDI PHEV|2.2 CRDi (4. gen)|2.5 T-GDI"],
+    "i10":      [[2008, 2026], "1.2 MPi"],
+  },
+  "Kia": {
+    "Ceed":     [[2006, 2026], "1.5 DPi|1.6 MPi|1.6 CRDi 136"],
+    "XCeed":    [[2019, 2026], "1.5 DPi|1.6 GDI PHEV"],
+    "Stonic":   [[2017, 2026], "1.2 MPi|1.0 T-GDI 48V (100 LE)"],
+    "Sportage": [[2004, 2026], "1.6 GDI PHEV|2.0 CRDi"],
+    "Sorento":  [[2002, 2026], "1.6 GDI PHEV|2.2 CRDi (4. gen)"],
+    "Niro":     [[2016, 2026], "1.6 GDI PHEV|1.5 T-GDI Hybrid"],
+    "Picanto":  [[2004, 2026], "1.2 MPi"],
+  },
+  "Volkswagen": {
+    "Golf":    [[1997, 2026], "1.2 TSI evo|2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Passat":  [[1973, 2026], "2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Tiguan":  [[2007, 2026], "2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Tayron":  [[2024, 2026], "2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Touareg": [[2002, 2026], "3.0 V6 PHEV"],
+    "Polo":    [[1997, 2026], "1.2 TSI evo"],
+    "T-Roc":   [[2017, 2026], "1.2 TSI evo"],
+    "T-Cross": [[2019, 2026], "1.2 TSI evo"],
+  },
+  "Škoda": {
+    "Octavia": [[1997, 2026], "1.2 TSI evo|2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Superb":  [[2001, 2026], "2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Kodiaq":  [[2016, 2026], "2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Scala":   [[2019, 2026], "1.2 TSI evo"],
+    "Kamiq":   [[2019, 2026], "1.2 TSI evo"],
+    "Fabia":   [[2000, 2026], "1.2 TSI evo"],
+  },
+  "Seat": {
+    "Leon":  [[1999, 2026], "1.2 TSI evo|2.0 TSI GTE (PHEV)|2.0 TDI 200"],
+    "Ibiza": [[1997, 2026], "1.2 TSI evo"],
+    "Arona": [[2017, 2026], "1.2 TSI evo"],
+  },
+  "Cupra": {
+    "Leon":      [[2018, 2026], "2.0 TSI GTE (PHEV)"],
+    "Formentor": [[2020, 2026], "2.0 TSI GTE (PHEV)"],
+    "Terramar":  [[2024, 2026], "2.0 TSI GTE (PHEV)"],
+  },
+  "Audi": {
+    "A3": [[1996, 2026], "2.0 TFSI e (PHEV)|1.2 TSI evo"],
+    "A4": [[1995, 2026], "2.0 TFSI e (PHEV)|2.0 TDI 200"],
+    "A5": [[2007, 2026], "2.0 TFSI e (PHEV)|2.0 TDI 200"],
+    "A6": [[1997, 2026], "2.0 TFSI e (PHEV)|3.0 TFSI e (PHEV)|2.0 TDI 200"],
+    "A7": [[2010, 2026], "3.0 TFSI e (PHEV)|3.0 TDI"],
+    "A8": [[2002, 2026], "3.0 TFSI e (PHEV)"],
+    "Q3": [[2011, 2026], "2.0 TFSI e (PHEV)|2.0 TDI 200"],
+    "Q5": [[2008, 2026], "2.0 TFSI e (PHEV)|2.0 TDI 200"],
+    "Q7": [[2005, 2026], "3.0 TFSI e (PHEV)|3.0 TDI"],
+    "Q8": [[2018, 2026], "3.0 TFSI e (PHEV)|3.0 TDI"],
+  },
+  "BMW": {
+    "2-es": [[2014, 2026], "B38 PHEV (225xe/330e)"],
+    "3-as": [[1998, 2026], "B38 PHEV (225xe/330e)|B48 PHEV (xDrive25e/30e)"],
+    "5-ös": [[1996, 2026], "B48 PHEV (xDrive25e/30e)|B58 PHEV (45e/545e)"],
+    "7-es": [[2001, 2026], "B58 PHEV (45e/545e)"],
+    "X1":   [[2009, 2026], "B48 PHEV (xDrive25e/30e)"],
+    "X3":   [[2003, 2026], "B48 PHEV (xDrive25e/30e)"],
+    "X5":   [[1999, 2026], "B58 PHEV (45e/545e)|N57 dízel (3.0)"],
+  },
+  "Mercedes": {
+    "A-osztály": [[1997, 2026], "M264 PHEV (250e)"],
+    "B-osztály": [[2005, 2026], "M264 PHEV (250e)"],
+    "C-osztály": [[2000, 2026], "M254 PHEV (300e)|OM654 PHEV (300de)"],
+    "E-osztály": [[2002, 2026], "M254 PHEV (300e)|OM654 PHEV (300de)"],
+    "CLA":       [[2013, 2026], "M264 PHEV (250e)"],
+    "GLA":       [[2013, 2026], "M264 PHEV (250e)"],
+    "GLC":       [[2015, 2026], "M254 PHEV (300e)|OM654 PHEV (300de)"],
+    "GLE / ML":  [[2005, 2026], "M254 PHEV (300e)|OM654 PHEV (300de)|OM654M (2.0 d 48V)"],
+  },
+  "Ford": {
+    "Puma":  [[2019, 2026], "1.0 EcoBoost Hybrid"],
+    "Focus": [[1998, 2026], "1.0 EcoBoost Hybrid"],
+    "Kuga":  [[2008, 2026], "1.6 Ti-VCT Hybrid"],
+  },
+  "Peugeot": {
+    "308":  [[2007, 2026], "1.6 THP PHEV|1.6 BlueHDi 100"],
+    "408":  [[2022, 2026], "1.6 THP PHEV"],
+    "3008": [[2008, 2026], "1.6 THP PHEV|2.0 BlueHDi 180"],
+    "5008": [[2009, 2026], "1.6 THP PHEV|2.0 BlueHDi 180"],
+    "208":  [[2012, 2026], "1.6 BlueHDi 100"],
+    "Partner / Rifter": [[2002, 2026], "1.6 BlueHDi 100|2.0 BlueHDi 180"],
+  },
+  "Citroën": {
+    "C4":          [[2004, 2026], "1.6 THP PHEV|1.6 BlueHDi 100"],
+    "C5 Aircross": [[2018, 2026], "1.6 THP PHEV|2.0 BlueHDi 180"],
+    "Berlingo":    [[2002, 2026], "1.6 BlueHDi 100"],
+  },
+  "Opel": {
+    "Astra":     [[1998, 2026], "1.6 THP PHEV|1.6 BlueHDi 100"],
+    "Grandland": [[2017, 2026], "1.6 THP PHEV|2.0 BlueHDi 180"],
+    "Combo":     [[2001, 2026], "1.6 BlueHDi 100"],
+  },
+  "Renault": {
+    "Mégane":  [[1999, 2026], "1.5 Blue dCi|2.0 Blue dCi"],
+    "Austral": [[2022, 2026], "1.5 Blue dCi"],
+    "Espace":  [[2002, 2026], "2.0 Blue dCi"],
+    "Kadjar":  [[2015, 2022], "1.5 Blue dCi|1.6 dCi 130"],
+    "Trafic":  [[2001, 2026], "2.0 Blue dCi"],
+    "Kangoo":  [[2001, 2026], "1.5 Blue dCi"],
+  },
+  "Dacia": {
+    "Duster":  [[2010, 2026], "1.5 Blue dCi"],
+    "Jogger":  [[2022, 2026], "1.0 TCe ECO-G (LPG)"],
+    "Sandero": [[2008, 2026], "1.5 Blue dCi"],
+  },
+  "Nissan": {
+    "Qashqai": [[2007, 2026], "1.5 Blue dCi|1.6 dCi 130"],
+    "X-Trail": [[2001, 2026], "1.6 dCi 130|2.0 Blue dCi"],
+  },
+  "Mazda": {
+    "3":     [[2003, 2026], "2.0 Skyactiv-X"],
+    "CX-30": [[2019, 2026], "2.0 Skyactiv-X"],
+  },
+  "Toyota": {
+    "Prius":     [[2000, 2026], "1.8 Hybrid (PHEV)|2.0 Hybrid (5. gen)"],
+    "C-HR":      [[2016, 2026], "2.0 Hybrid (5. gen)"],
+    "Corolla":   [[1997, 2026], "1.8 Hybrid (PHEV)"],
+    "Proace City":[[2020, 2026], "1.5 BlueHDi 130|50 kWh elektromos"],
+  },
+  "Volvo": {
+    "S60 / V60": [[2010, 2026], "2.0 D3/D4 (VEA)"],
+    "XC60":      [[2008, 2026], "2.0 D3/D4 (VEA)"],
+    "XC90":      [[2002, 2026], "2.0 D3/D4 (VEA)"],
+    "V40":       [[2012, 2019], "1.6 D2|2.0 D3/D4 (VEA)"],
+  },
+};
+
+/* Összefésülés: az új motorok bekerülnek a fő táblába, a modellek évjárat-sávja
+   kiterjed, a motorlistájuk pedig kiegészül (duplikátum nélkül). */
+(function merge2025() {
+  Object.keys(ENGINES_2025).forEach((code) => {
+    if (!ENGINES[code]) ENGINES[code] = ENGINES_2025[code];
+  });
+  STILL_MADE_2026.forEach((code) => {
+    if (ENGINES[code] && ENGINES[code][3][1] < 2026) ENGINES[code][3][1] = 2026;
+  });
+  [FLEET_2025, FLEET_2025_B].forEach((block) => {
+    Object.keys(block).forEach((brand) => {
+      if (!FLEET[brand]) FLEET[brand] = {};
+      Object.keys(block[brand]).forEach((model) => {
+        const [span, codes] = block[brand][model];
+        const cur = FLEET[brand][model];
+        if (!cur) { FLEET[brand][model] = [span.slice(), codes]; return; }
+        cur[0] = [Math.min(cur[0][0], span[0]), Math.max(cur[0][1], span[1])];
+        const set = [];
+        cur[1].split("|").concat(codes.split("|")).forEach((c) => {
+          if (c && set.indexOf(c) === -1) set.push(c);
+        });
+        cur[1] = set.join("|");
+      });
+    });
+  });
+})();
+
 /* ---------- LEKÉRDEZŐ FÜGGVÉNYEK ---------- */
 
 /** Minden márka, ábécésorrendben. */

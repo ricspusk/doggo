@@ -720,9 +720,9 @@ function buildForecast(d) {
      Nincs bennük kuplungcsomag és nincs DSG-szerű olajcsere-határidő — ezekre
      tehát nem szabad váltóolaj- vagy kuplungtételt kiírni. */
   const trueAuto = d.gearbox === "Automata" && d.fuel !== "Hibrid" && d.fuel !== "Elektromos";
-  push(trueAuto, { title: "Automata / DSG váltóolaj csere", kind: "karbantartás",
+  push(trueAuto, { title: "Automata váltó olajcseréje", kind: "karbantartás",
     urgency: km >= 60000 ? "esedékes" : "figyeld",
-    detail: "Sokan kihagyják — kihagyva a váltó tönkremehet, ami a legdrágább javítások egyike. Kérj rá dokumentumot.",
+    detail: "Sokan kihagyják — kihagyva a váltó tönkremehet, ami a legdrágább javítások egyike. Dupla kuplungos (DSG, S tronic, DCT, EDC) váltónál kb. 60 e km-enként kötelező; hagyományos automatánál is ajánlott 80–100 e km-enként, hiába mondja a gyártó „élettartamra”. Kérj rá dokumentumot.",
     estCost: "kb. 60–150 e Ft" });
   push(trueAuto && km >= 150000, { title: "Automata váltó / DSG kuplung felújítás", kind: "meghibásodás",
     urgency: km >= 200000 ? "esedékes" : "figyeld",

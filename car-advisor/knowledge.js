@@ -527,7 +527,10 @@ const KB_ENGINES = [
     note: "Turbó nélküli, egyszerű szerkezet — a kategória egyik legolcsóbban tartható motorja. Szinte minden rajta múló tétel a vezérműszíj rendszeressége.",
   },
   {
-    m: /\bd4f\b|\bk4m\b|^(?=.*\b(?:renault|dacia|clio|megane|logan|sandero|twingo)\b)(?=.*\b(?:1[.,]2|1[.,]4|1[.,]6)\s*(?:16v)?\b)(?!.*\b(?:dci|tce|energy)\b)/i,
+    /* A kizárásba a hibrid jelölések is bekerültek: a „Renault Austral 1.2
+       E-Tech Hybrid” korábban ideillett, és tévesen vezérműszíj-kockázatot
+       kapott — pedig az E-Tech hibridben egészen más szerkezet van. */
+    m: /\bd4f\b|\bk4m\b|^(?=.*\b(?:renault|dacia|clio|megane|logan|sandero|twingo)\b)(?=.*\b(?:1[.,]2|1[.,]4|1[.,]6)\s*(?:16v)?\b)(?!.*(?:dci|tce|energy|e-?tech|hybrid|mhev|48v|elektromos))/i,
     name: "Renault / Dacia 1.2–1.6 16V (D4F / K4M)",
     faults: [
       { title: "Vezérműszíj (K4M) / lánc (D4F)", from: 100000, sev: "high", cost: "80–200 e Ft",
@@ -1115,6 +1118,167 @@ const KB_ENGINES = [
       { title: "Turbó és olajellátás", from: 160000, sev: "mid", cost: "250–600 e Ft", detail: "Kék füst, sípolás terhelés alatt." },
     ],
   },
+
+  /* ============================================================
+     2025-ÖS MODELLÉV — az új hajtáslánc-családok kockázatai
+     ============================================================ */
+  {
+    m: /\betsi\b|\bmhev\b|\b48\s*v\b|mild\s*hybrid/i, name: "48 voltos mild hibrid (MHEV) rendszer",
+    faults: [
+      { title: "48 V-os akkumulátor és indító-generátor", from: 120000, sev: "mid", cost: "150–500 e Ft",
+        detail: "A mild hibrid NEM tud tisztán elektromosan menni: egy 48 voltos kis akku és egy szíjhajtású indító-generátor (RSG/BSG) segíti a motort. Ha az akku gyengül, a start-stop akadozik, a rásegítés elmarad, és hibaüzenet jön. Az akku 8–10 év után jellemzően cserére szorul, és nem olcsó." },
+      { title: "Start-stop és hajtószíj terhelése", from: 100000, sev: "mid", cost: "60–250 e Ft",
+        detail: "A rendszer sokkal többször indítja újra a motort, mint egy hagyományos autó. A hajtószíj, a feszítő és a szabadonfutó tárcsa ezért gyorsabban kopik." },
+    ],
+    note: "A mild hibrid keveset spórol (5–10%), viszont egy plusz elektromos rendszert hoz be. Vásárláskor kérdezz rá, volt-e vele hibaüzenet.",
+  },
+  {
+    m: /\betsi\b|\b1[.,][05]\s*etsi\b/i, name: "VW-csoport 1.0 / 1.5 eTSI (48V)",
+    faults: [
+      { title: "Vezérműszíj (SZÍJ, nem lánc!)", from: 110000, sev: "high", cost: "120–300 e Ft",
+        detail: "Az EA211 evo motorcsaládban SZÍJ hajtja a vezérlést, nem lánc. A csereintervallum határidő, nem javaslat — kérj róla számlát." },
+      { title: "Hengerlekapcsolás (ACT) és szívószelep-koksz", from: 100000, sev: "mid", cost: "80–350 e Ft",
+        detail: "A 1.5-ösnél az ACT alacsony fordulaton rezonálhat és rángathat — próbaúton 1500-as fordulaton, kis gázon figyeld. A közvetlen befúvás miatt a szelepekre koksz rakódik." },
+    ],
+    note: "Modern, takarékos motor — a fő kockázata nem meglepetés, hanem egy határidő: a vezérműszíj.",
+  },
+  {
+    m: /\b1[.,]5\s*t-?gdi\b|\b2[.,]0\s*t-?gdi\b/i, name: "Hyundai/Kia 1.5 / 2.0 T-GDI",
+    faults: [
+      { title: "Szívószelep-koksz és nagynyomású szivattyú", from: 110000, sev: "mid", cost: "80–350 e Ft",
+        detail: "Közvetlen befúvású turbós motor: a szelepekre koksz rakódik, a nagynyomású szivattyú pedig kopó alkatrész." },
+      { title: "Turbó olajellátása", from: 140000, sev: "mid", cost: "200–550 e Ft",
+        detail: "A rendszeres olajcsere itt nem opció. A 2.0 T-GDI (N modellek) sportos használatban jóval gyorsabban terhelődik — kérdezz rá, versenyeztették-e." },
+    ],
+    note: "Erős, modern motorok. A 2.0 T-GDI N-nél a legfontosabb kérdés nem a km, hanem hogy HOGYAN használták.",
+  },
+  {
+    m: /e-?power/i, name: "Nissan e-Power (soros hibrid)",
+    faults: [
+      { title: "Hajtásakkumulátor és inverter", from: 150000, sev: "mid", cost: "400 e – 1,2 M Ft",
+        detail: "Az e-Powernél a benzinmotor SOHA nem hajtja a kerekeket, csak áramot termel — a hajtás mindig elektromos. Az akku kicsi, ezért sűrűn töltődik és merül; SoH-mérést itt is kérj." },
+      { title: "Benzinmotor terhelése", from: 160000, sev: "mid", cost: "150–500 e Ft",
+        detail: "A motor gyakran állandó, magas fordulaton jár generátorként. Autópályán ezért zajos és a fogyasztása sem jobb, mint egy jó benzinesé — városban viszont kiváló." },
+    ],
+    note: "Nem tölthető: úgy vezeted, mint egy benzinest. Városra kiváló, autópályára kevésbé.",
+  },
+  {
+    m: /e:?hev\b|\bi-?mmd\b/i, name: "Honda e:HEV (soros-párhuzamos hibrid)",
+    faults: [
+      { title: "Hajtásakkumulátor és teljesítmény-elektronika", from: 160000, sev: "mid", cost: "400 e – 1,2 M Ft",
+        detail: "SoH-mérést kérj. A Honda hibridje egyszerű szerkezet: nincs hagyományos váltó, csak egy tengelykapcsoló köti rá a motort a kerékre autópályán." },
+      { title: "12 voltos kisakku és fékrendszer", from: 100000, sev: "mid", cost: "40–200 e Ft",
+        detail: "A rekuperáció miatt a mechanikus fék alig dolgozik, ezért berozsdásodhat és megszorulhat." },
+    ],
+    note: "Az egyik legkiforrottabb hibrid rendszer a Toyotáé mellett — kevés kopó alkatrésszel.",
+  },
+  {
+    m: /e-?tech\s*(hybrid)?\b|\b1[.,]6\s*hybrid\b.*(dacia|renault|jogger|duster|bigster)|(dacia|renault|jogger|duster|bigster).*\b1[.,]6\s*hybrid\b/i,
+    name: "Renault / Dacia E-Tech hibrid (1.2 / 1.6)",
+    faults: [
+      { title: "Karmos (dog-box) váltó és tengelykapcsolók", from: 120000, sev: "mid", cost: "250–800 e Ft",
+        detail: "Az E-Tech váltója egyedi, kuplung nélküli karmos szerkezet, amit a villanymotor szinkronizál. Ha rángat vagy csattan váltáskor, azt vizsgáltasd meg — a javítása szakműhelyt igényel." },
+      { title: "Hajtásakkumulátor és 12 V-os akku", from: 150000, sev: "mid", cost: "300 e – 1 M Ft",
+        detail: "SoH-mérést kérj. A kisebb akkuk sűrűbb ciklusban dolgoznak." },
+    ],
+    note: "Városban nagyon takarékos (4 l/100 km alatt is megy), de a váltószerkezete egyedi — nem minden szerelő ért hozzá.",
+  },
+  {
+    m: /\bm254\b/i, name: "Mercedes M254 (2.0 turbó + 48V)",
+    faults: [
+      { title: "48 V-os rendszer és integrált indító-generátor (ISG)", from: 120000, sev: "mid", cost: "200–700 e Ft",
+        detail: "Az ISG a motor és a váltó közé épül. Ha meghibásodik, a javítás munkaigényes, mert a váltót le kell venni." },
+      { title: "Szívószelep-koksz és nagynyomású szivattyú", from: 110000, sev: "mid", cost: "100–400 e Ft", detail: "Közvetlen befúvás velejárója." },
+    ],
+    note: "Kulturált, erős és csendes motor; a kockázata inkább az elektromos rásegítő rendszerben van, mint a mechanikában.",
+  },
+  {
+    m: /\bom654m\b/i, name: "Mercedes OM654M (2.0 d + 48V)",
+    faults: [
+      { title: "AdBlue-rendszer és NOx-érzékelő", from: 110000, sev: "mid", cost: "150–500 e Ft",
+        detail: "A modern dízelek visszatérő bosszúsága: hibaüzenet, majd indításmegtagadás." },
+      { title: "48 V-os rásegítő rendszer", from: 130000, sev: "mid", cost: "200–600 e Ft", detail: "Az ISG hibája a váltó levételével jár." },
+    ],
+    note: "Nagyon csendes és takarékos dízel, mentes az OM651 injektor- és láncgondjaitól.",
+  },
+  {
+    m: /\bb[345]\b.*volvo|volvo.*\bb[345]\b|\bb[345]\s*\(48v/i, name: "Volvo B3 / B4 / B5 (48V benzin)",
+    faults: [
+      { title: "48 V-os rendszer és indító-generátor", from: 120000, sev: "mid", cost: "200–600 e Ft",
+        detail: "A start-stop akadozása és a hiányzó rásegítés az árulkodó jel." },
+      { title: "Vezérműszíj (részben olajban fut)", from: 120000, sev: "high", cost: "150–350 e Ft",
+        detail: "A VEA motorcsaládban a szíj részben olajban fut; morzsálódva eltömíti az olajszivattyú szűrőjét. Kérj SZÁMLÁT a cseréről." },
+    ],
+  },
+  {
+    m: /e-?skyactiv/i, name: "Mazda e-Skyactiv (MHEV / PHEV / 3.3 dízel)",
+    faults: [
+      { title: "Szívószelep-koksz (benzin) / AdBlue (dízel)", from: 110000, sev: "mid", cost: "80–400 e Ft",
+        detail: "A benzineseknél a közvetlen befúvás kokszol, a 3.3 dízelnél az AdBlue-rendszer a visszatérő panasz." },
+      { title: "Hajtásakkumulátor (PHEV)", from: 100000, sev: "high", cost: "1 – 2,5 M Ft",
+        detail: "A tölthető változatnál SoH-mérés kötelező. Kérdezd meg, tényleg töltötték-e — a soha nem töltött PHEV a legrosszabb vétel." },
+    ],
+    note: "A 3.3 hathengeres dízel meglepően takarékos és kulturált; a Mazda tudatosan a nagy lökettérfogatot választotta a kis turbós motorok helyett.",
+  },
+  {
+    m: /\bdig-?t\s*mhev\b|\b1[.,]3\s*dig-?t\b/i, name: "Nissan 1.3 DIG-T (Mercedes-eredetű)",
+    faults: [
+      { title: "Szívószelep-koksz és időzítőlánc", from: 120000, sev: "mid", cost: "100–450 e Ft",
+        detail: "Ez valójában a Mercedes M282 motorja. Közvetlen befúvás: a szelepekre koksz rakódik; a lánc hidegindításkor csöröghet." },
+      { title: "Turbó és olajellátás", from: 140000, sev: "mid", cost: "200–500 e Ft", detail: "A rendszeres olajcsere kritikus." },
+    ],
+  },
+  {
+    m: /\b1[.,]5\s*dpi\b|\b1[.,]6\s*mpi\b|\b1[.,]2\s*mpi\b/i, name: "Hyundai/Kia szívó benzin (1.2 / 1.5 DPi / 1.6 MPi)",
+    faults: [
+      { title: "Vezérműlánc", from: 180000, sev: "mid", cost: "180–420 e Ft",
+        detail: "Láncos vezérlés, nincs szíjcsere-határidő. Nagyon hosszú életű; 200 e km felett figyeld a hidegindítási zajt." },
+      { title: "Gyújtótekercs, hűtőrendszer", from: 150000, sev: "mid", cost: "30–150 e Ft",
+        detail: "Rutin kopás: rángatás, akadozó alapjárat, lassú hűtővíz-fogyás." },
+    ],
+    note: "Turbó nélküli, közvetlen befúvás nélküli szívómotorok — a márka kínálatának LEGKEVESEBB kockázatot hordozó egységei. Lassabbak a turbósoknál, cserébe alig van rajtuk elromolható rész.",
+  },
+  {
+    m: /\b2[.,]5\s*t-?gdi\b/i, name: "Hyundai/Kia 2.5 T-GDI",
+    faults: [
+      { title: "Nagynyomású szivattyú és injektorok", from: 110000, sev: "mid", cost: "150–500 e Ft",
+        detail: "Erős, kettős befúvású motor (közvetlen + szívócsöves), ami a kokszolódást mérsékli — de a nagynyomású rendszer így is kopó alkatrész." },
+      { title: "Turbó és olajellátás", from: 130000, sev: "high", cost: "300–800 e Ft",
+        detail: "281 lóerő egy 2,5 literes motorból: a turbó erősen terhelt. A rendszeres, rövid ciklusú olajcsere itt nem opció, hanem feltétel." },
+    ],
+    note: "Erős és kulturált, de a fenntartása nem kisautó-kategória — a gumi, a fék és az olaj is többe kerül.",
+  },
+  {
+    m: /blue\s*dci/i, name: "Renault/Dacia/Nissan Blue dCi (1.5 / 2.0)",
+    faults: [
+      { title: "AdBlue-rendszer és NOx-érzékelő", from: 100000, sev: "mid", cost: "150–500 e Ft",
+        detail: "A Blue dCi az AdBlue-s generáció. A szivattyú és az érzékelők hibája visszatérő panasz: hibaüzenet, majd indításmegtagadás. Kérdezz rá, volt-e vele gond." },
+      { title: "Turbó olajellátása és DPF", from: 150000, sev: "high", cost: "250–700 e Ft",
+        detail: "A K9K-örökség itt is él: az olajellátás elhanyagolása a turbót viszi el először. Kérd el a teljes olajcsere-történetet, és városi használatnál számolj a DPF-fel." },
+    ],
+    note: "Az elődjénél kulturáltabb és takarékosabb, de az AdBlue-elektronika új hibaforrást hozott be.",
+  },
+  {
+    m: /skyactiv-?x/i, name: "Mazda 2.0 Skyactiv-X (SPCCI)",
+    faults: [
+      { title: "Szívószelep-koksz és gyújtási rendszer", from: 100000, sev: "mid", cost: "100–400 e Ft",
+        detail: "Ez a motor kompressziós gyújtást használ szikragyújtással vezérelve (SPCCI) — technikailag lenyűgöző, de bonyolult. A koksz és az érzékelők hibája érzékenyebben érinti, mint egy hagyományos motort." },
+      { title: "Szervizháttér és diagnosztika", from: 0, sev: "mid", cost: "változó",
+        detail: "Kevés fut belőle, és a hibakeresés márkaszervizt igényel. Ha nincs a közeledben Mazda-szerviz, ezt vedd figyelembe a döntésnél." },
+    ],
+    note: "Nagyon érdekes technika, de HASZNÁLTAN kockázatosabb, mint a sima Skyactiv-G: bonyolultabb és kevesebben értenek hozzá. A takarékossági előnye a gyakorlatban kicsi.",
+  },
+  {
+    m: /eco-?g|\blpg\b|autóg[áa]z|firefly/i, name: "Gyári gázüzem (ECO-G) és Fiat FireFly",
+    faults: [
+      { title: "Szelepülékek kopása gázüzemben", from: 140000, sev: "mid", cost: "150–500 e Ft",
+        detail: "A gáz szárazabban ég, mint a benzin, ezért a szelepülékek gyorsabban kopnak. A gyári rendszerek erre fel vannak készítve, de a szelephézag ellenőrzése itt fontosabb, mint egy benzinesnél." },
+      { title: "Gáztartály felülvizsgálata", from: 0, sev: "mid", cost: "30–120 e Ft",
+        detail: "A tartály hatósági felülvizsgálata időszakos és kötelező — kérdezz rá, mikor jár le. Lejárt tartállyal az autó nem vizsgáztatható." },
+    ],
+    note: "A gyári gázüzem (nem utólagos beépítés) megbízható, és a kilométerköltséget közel felezi.",
+  },
+
 ];
 
 /* ---------- Váltó-specifikus tudás ---------- */
