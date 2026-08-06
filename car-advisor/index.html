@@ -16,7 +16,7 @@
     />
     <!-- A ?v= verziószám miatt minden frissítéskor friss fájl töltődik be
          (különben a böngésző a régi CSS-t párosítaná az új HTML-lel). -->
-    <link rel="stylesheet" href="style.css?v=8" />
+    <link rel="stylesheet" href="style.css?v=9" />
   </head>
   <body>
     <!-- Márkajel: sebességmérő-ív (saját jel, nem másolat) -->
@@ -220,34 +220,18 @@
 
               <form id="carForm" novalidate>
                 <div class="fields">
-                  <label class="f f--wide">
-                    <span class="f__label">Márka és modell <i>*</i></span>
-                    <input name="model" type="text" placeholder="pl. Volkswagen Golf"
-                           required autocomplete="off" list="modelHints" />
-                    <datalist id="modelHints">
-                      <option>Volkswagen Golf</option>
-                      <option>Volkswagen Passat</option>
-                      <option>Volkswagen Tiguan</option>
-                      <option>Skoda Octavia</option>
-                      <option>Skoda Fabia</option>
-                      <option>Ford Focus</option>
-                      <option>Opel Astra</option>
-                      <option>Toyota Corolla</option>
-                      <option>Toyota Prius</option>
-                      <option>Toyota RAV4</option>
-                      <option>Renault Megane</option>
-                      <option>Renault Clio</option>
-                      <option>BMW 3</option>
-                      <option>BMW X3</option>
-                      <option>Audi A4</option>
-                      <option>Hyundai Tucson</option>
-                      <option>Kia Sportage</option>
-                      <option>Dacia Duster</option>
-                      <option>Suzuki Vitara</option>
-                      <option>Tesla Model 3</option>
-                      <option>Nissan Qashqai</option>
-                    </datalist>
-                    <span class="fieldnote" id="modelNote" hidden></span>
+                  <label class="f">
+                    <span class="f__label">Márka <i>*</i></span>
+                    <select name="brand" id="brandSel" required>
+                      <option value="">Válassz márkát…</option>
+                    </select>
+                  </label>
+
+                  <label class="f">
+                    <span class="f__label">Modell <i>*</i></span>
+                    <select name="modelSel" id="modelSel" required disabled>
+                      <option value="">Előbb a márkát…</option>
+                    </select>
                   </label>
 
                   <label class="f">
@@ -255,6 +239,18 @@
                     <input name="year" type="number" min="1990" max="2026" placeholder="2016" required />
                     <span class="fieldnote err" id="yearNote" hidden></span>
                   </label>
+
+                  <label class="f">
+                    <span class="f__label">Motor / hengerűrtartalom <i>*</i></span>
+                    <select name="engineSel" id="engineSel" required disabled>
+                      <option value="">Előbb a modellt és az évjáratot…</option>
+                    </select>
+                    <span class="fieldnote" id="modelNote" hidden></span>
+                  </label>
+
+                  <!-- Az összeállított "Márka Modell Motor" szöveg, amit a
+                       tudásbázis és a kereső-linkek használnak. -->
+                  <input type="hidden" name="model" id="modelHidden" />
 
                   <label class="f">
                     <span class="f__label">Futott km <i>*</i></span>
@@ -419,9 +415,10 @@
       </div>
     </footer>
 
-    <script src="knowledge.js?v=8"></script>
-    <script src="cars.js?v=8"></script>
-    <script src="app.js?v=8"></script>
-    <script src="advise.js?v=8"></script>
+    <script src="knowledge.js?v=9"></script>
+    <script src="cars.js?v=9"></script>
+    <script src="fleet.js?v=9"></script>
+    <script src="app.js?v=9"></script>
+    <script src="advise.js?v=9"></script>
   </body>
 </html>

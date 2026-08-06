@@ -228,6 +228,121 @@ const MODEL_RULES = [
     note: "Ez a modell sedan és kombi kivitelben készül." },
 ];
 
+/* ============================================================
+   MÁRKA → MODELL → MOTOR legördülők (fleet.js adatbázisából)
+   ------------------------------------------------------------
+   A három mező egymásra épül: a modell csak az adott márkáé lehet,
+   a motor pedig csak az adott modellhez ÉS évjárathoz létező.
+   Így nem lehet nem létező kombinációt megadni.
+   A kiválasztott hármasból összeállítjuk a rejtett `model` mezőt
+   ("Volkswagen Golf 1.9 PD TDI"), amit a tudásbázis felismer.
+   ============================================================ */
+const brandSel = document.getElementById("brandSel");
+const modelSel = document.getElementById("modelSel");
+const engineSel = document.getElementById("engineSel");
+const modelHidden = document.getElementById("modelHidden");
+const hasFleet = typeof FLEET !== "undefined" && brandSel && modelSel && engineSel;
+
+function fillSelect(sel, items, placeholder) {
+  sel.innerHTML = "";
+  const ph = document.createElement("option");
+  ph.value = ""; ph.textContent = placeholder;
+  sel.appendChild(ph);
+  items.forEach((it) => {
+    const o = document.createElement("option");
+    if (typeof it === "string") { o.value = it; o.textContent = it; }
+    else { o.value = it.value; o.textContent = it.text; if (it.data) Object.assign(o.dataset, it.data); }
+    sel.appendChild(o);
+  });
+}
+
+if (hasFleet) {
+  fillSelect(brandSel, fleetBrands(), "Válassz márkát…");
+
+  brandSel.addEventListener("change", () => {
+    const models = brandSel.value ? fleetModels(brandSel.value) : [];
+    fillSelect(modelSel, models, brandSel.value ? "Válassz modellt…" : "Előbb a márkát…");
+    modelSel.disabled = !models.length;
+    refreshEngines();
+    syncModelField();
+  });
+
+  modelSel.addEventListener("change", () => { applyModelSpan(); refreshEngines(); syncModelField(); });
+  engineSel.addEventListener("change", syncModelField);
+}
+
+/* A modell gyártási időszakára szorítjuk az évjárat mezőt. */
+function applyModelSpan() {
+  if (!hasFleet) return;
+  const span = brandSel.value && modelSel.value ? fleetModelYears(brandSel.value, modelSel.value) : null;
+  const yEl = form.elements.year;
+  yEl.min = span ? span[0] : 1990;
+  yEl.max = span ? Math.min(span[1], 2026) : 2026;
+  const note = document.getElementById("modelNote");
+  if (span) {
+    const y = Number(yEl.value);
+    if (y && (y < span[0] || y > span[1])) {
+      yEl.value = "";                      // a modellhez nem létező évjárat
+    }
+    note.textContent = `ℹ️ ${modelSel.value}: gyártás ${span[0]}–${span[1] >= 2024 ? "napjainkig" : span[1]}.`;
+    note.hidden = false;
+  } else if (note) {
+    note.hidden = true;
+  }
+}
+
+function refreshEngines() {
+  if (!hasFleet) return;
+  const year = Number(form.elements.year.value) || null;
+  const list = brandSel.value && modelSel.value
+    ? fleetEngines(brandSel.value, modelSel.value, year) : [];
+  const prev = engineSel.value;
+  fillSelect(
+    engineSel,
+    list.map((e) => ({
+      value: e.code,
+      text: e.label,
+      data: { fuel: e.fuel, gearboxes: e.gearboxes.join(","), hp: String(e.hp) },
+    })),
+    !modelSel.value ? "Előbb a modellt…"
+      : !year ? "Add meg az évjáratot…"
+      : list.length ? "Válassz motort…" : "Ehhez az évjárathoz nincs adatunk"
+  );
+  engineSel.disabled = !list.length;
+  if (list.some((e) => e.code === prev)) engineSel.value = prev;
+  syncFuelGearboxFromEngine();
+}
+
+/* A választott motorból következik az üzemanyag és a lehetséges váltók.
+   FIGYELEM: a select-et sosem tiltjuk le (a letiltott mező kimarad a
+   FormData-ból), csak a nem létező opciókat. */
+function syncFuelGearboxFromEngine() {
+  if (!hasFleet) return;
+  const opt = engineSel.selectedOptions[0];
+  const fuelSel = form.elements.fuel, gbSel = form.elements.gearbox;
+  if (!opt || !opt.value) {
+    Array.from(fuelSel.options).forEach((o) => (o.disabled = false));
+    Array.from(gbSel.options).forEach((o) => (o.disabled = false));
+    fuelSel.classList.remove("locked"); gbSel.classList.remove("locked");
+    return;
+  }
+  const fuel = opt.dataset.fuel;
+  Array.from(fuelSel.options).forEach((o) => (o.disabled = o.value !== fuel));
+  fuelSel.value = fuel;
+  fuelSel.classList.add("locked");
+
+  const allowed = (opt.dataset.gearboxes || "").split(",").filter(Boolean);
+  Array.from(gbSel.options).forEach((o) => (o.disabled = allowed.length ? !allowed.includes(o.value) : false));
+  if (allowed.length && !allowed.includes(gbSel.value)) gbSel.value = allowed[0];
+  gbSel.classList.toggle("locked", allowed.length === 1);
+}
+
+/* A rejtett `model` mező tartalma: "Márka Modell Motor" */
+function syncModelField() {
+  if (!hasFleet || !modelHidden) return;
+  modelHidden.value = [brandSel.value, modelSel.value, engineSel.value].filter(Boolean).join(" ");
+}
+
 const selects = {
   fuel: form.elements.fuel,
   gearbox: form.elements.gearbox,
@@ -277,6 +392,28 @@ function checkYear() {
 function applyModelRules() {
   const rule = findRule(form.elements.model.value);
   activeRule = rule;
+  /* A legördülős módban a motor már meghatározza az üzemanyagot és a váltót,
+     az évjárat-korlátot pedig a modell gyártási időszaka adja — a régi
+     szöveges szabályokból itt csak a KIVITEL (bodyType) szűrése marad. */
+  if (hasFleet) {
+    applyModelSpan();
+    Array.from(selects.bodyType.options).forEach((o) => (o.disabled = false));
+    selects.bodyType.classList.remove("locked");
+    if (rule && rule.bodyTypes) {
+      let first = null;
+      Array.from(selects.bodyType.options).forEach((o) => {
+        const ok = o.value === "" || rule.bodyTypes.includes(o.value);
+        o.disabled = !ok;
+        if (ok && o.value && first === null) first = o.value;
+      });
+      if (selects.bodyType.value && !rule.bodyTypes.includes(selects.bodyType.value) && first) {
+        selects.bodyType.value = first;
+      }
+      if (rule.bodyTypes.length === 1) selects.bodyType.classList.add("locked");
+    }
+    syncFuelGearboxFromEngine();
+    return;
+  }
 
   // 1) Mindent visszaállítunk alapállapotba
   Object.entries(selects).forEach(([key, sel]) => {
@@ -346,9 +483,20 @@ function applyModelRules() {
   modelNote.hidden = false;
 }
 
-form.elements.model.addEventListener("input", applyModelRules);
-form.elements.model.addEventListener("change", applyModelRules);
-yearInput.addEventListener("input", checkYear);
+/* A `model` mező mostantól rejtett és a három legördülőből áll össze, ezért
+   nem ő kapja a beírás-eseményt — a legördülők változásakor futtatjuk a
+   szabályokat. Az évjárat változása újraszűri a motorlistát is. */
+if (hasFleet) {
+  [brandSel, modelSel, engineSel].forEach((sel) =>
+    sel.addEventListener("change", () => { syncModelField(); applyModelRules(); })
+  );
+  yearInput.addEventListener("input", () => { refreshEngines(); syncModelField(); checkYear(); });
+  yearInput.addEventListener("change", () => { refreshEngines(); syncModelField(); });
+} else {
+  form.elements.model.addEventListener("input", applyModelRules);
+  form.elements.model.addEventListener("change", applyModelRules);
+  yearInput.addEventListener("input", checkYear);
+}
 applyModelRules();
 
 form.addEventListener("submit", async function (e) {
