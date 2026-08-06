@@ -746,6 +746,375 @@ const KB_ENGINES = [
       { title: "Vezérműszíj", from: 100000, sev: "high", cost: "120–300 e Ft", detail: "Kb. 120–160 e km." },
     ],
   },
+
+  /* ============================================================
+     A FLOTTA-ADATBÁZIS (fleet.js) TÖBBI HAJTÁSLÁNCA
+     Cél: a legördülőben választható MINDEN motorhoz legyen kockázati adat.
+     ============================================================ */
+
+  /* ---------- Kis benzinesek: VW, Opel, PSA, Toyota, Suzuki ---------- */
+  {
+    m: /\b1[.,]2\s*htp\b|\bbmd\b|\bcgpa\b|\bawy\b/i, name: "1.2 HTP (VW-csoport, 3 hengeres)",
+    faults: [
+      { title: "Vezérműlánc nyúlása", from: 120000, sev: "high", cost: "250–500 e Ft",
+        detail: "A 6V-os és 12V-os 1.2 HTP hírhedt gyengéje: a lánc és a feszítő elkopik. Hidegindításkor pár másodperces csörgés az árulkodó jel — ha ezt hallod, ne vedd meg vizsgálat nélkül." },
+      { title: "Gyújtótekercs, hengerfejtömítés", from: 150000, sev: "mid", cost: "40–200 e Ft", detail: "Rángatás, hűtővíz-fogyás." },
+    ],
+    note: "Lassú, de olcsón tartható motor — az egyetlen komoly tétel rajta a vezérműlánc.",
+  },
+  {
+    m: /\b1[.,]4\s*tdi\b|\bamf\b|\bbnm\b/i, name: "1.4 TDI (3 hengeres, VW-csoport)",
+    faults: [
+      { title: "Vezérműszíj", from: 90000, sev: "high", cost: "80–200 e Ft",
+        detail: "Kb. 120 e km-enként; szakadás esetén szelepes motorkár. Ennél a motornál különösen fontos a papír." },
+      { title: "Porlasztók (PD) és turbó", from: 160000, sev: "mid", cost: "80–350 e Ft", detail: "Nehéz indítás, füstölés, teljesítményvesztés." },
+    ],
+    note: "Szívós kismotor, de érdes és lassú; a szíjcsere elmulasztása itt is végzetes.",
+  },
+  {
+    m: /\b1[.,](2|4)\s*twinport\b|\bz1[24]xep\b|\ba1[24]xer\b/i, name: "Opel 1.2 / 1.4 Twinport",
+    faults: [
+      { title: "Vezérműlánc nyúlása", from: 120000, sev: "high", cost: "250–500 e Ft",
+        detail: "Hidegindításkor csörgés a motor elejéből. Ha a lánc átugrik, a szelepek nekimennek a dugattyúnak." },
+      { title: "Termosztát, vízpumpa", from: 130000, sev: "mid", cost: "40–150 e Ft", detail: "A műanyag házak repednek, lassú hűtővíz-fogyás." },
+    ],
+  },
+  {
+    m: /\b1[.,]0\s*turbo\b|\bb10xft\b|\bd10xft\b/i, name: "Opel 1.0 Turbo (3 hengeres)",
+    faults: [
+      { title: "Vezérműszíj (olajban fut!)", from: 90000, sev: "high", cost: "200–450 e Ft",
+        detail: "Ennél a motornál a szíj OLAJBAN fut. Öregedve morzsálódik, és a törmelék eltömíti az olajszivattyú szűrőjét — ez motorkárhoz vezet. Kérdezz rá a cserére, kérj számlát." },
+      { title: "Turbó és hűtőrendszer", from: 130000, sev: "mid", cost: "150–450 e Ft", detail: "Sípolás, teljesítményvesztés, hűtővíz-fogyás." },
+    ],
+  },
+  {
+    m: /\b1[.,]0\s*(vti|vvt-?i)\b|\b1kr\b|\bcfb\b/i, name: "1.0 három hengeres (Toyota/PSA 1KR)",
+    faults: [
+      { title: "Vezérműlánc", from: 180000, sev: "mid", cost: "180–400 e Ft", detail: "Hosszú életű; 200 e km felett figyeld a hidegindítási zajt." },
+      { title: "Olajfogyás, szelepszár-tömítés", from: 160000, sev: "mid", cost: "60–250 e Ft", detail: "Kékes füst indításkor; ellenőrizd az olajszintet." },
+    ],
+    note: "A kategória egyik legmegbízhatóbb motorja — kevés bajjal, olcsó alkatrésszel.",
+  },
+  {
+    m: /\b1[.,][24]\s*vti\b|\bep3\b|\bnfp\b/i, name: "PSA 1.2 / 1.4 VTi (szívó)",
+    faults: [
+      { title: "Vezérműlánc nyúlása", from: 130000, sev: "mid", cost: "200–420 e Ft", detail: "Hidegindításkor csörgés; a PSA kisbenzineseknél visszatérő tétel." },
+      { title: "Gyújtótekercs, szívócsonk", from: 150000, sev: "mid", cost: "40–160 e Ft", detail: "Rángatás, hibás alapjárat." },
+    ],
+    note: "Turbó nélküli, egyszerű motor — sokkal kevesebb kockázat, mint a PureTech vagy a THP.",
+  },
+  {
+    m: /\b1[.,]2\s*dualjet\b|\bk12[bc]\b|\b1[.,][356]\s*benzin\b|\bm13a\b|\bm15a\b|\bm16a\b/i, name: "Suzuki szívó benzin (1.2–1.6, láncos)",
+    faults: [
+      { title: "Vezérműlánc", from: 180000, sev: "mid", cost: "150–350 e Ft", detail: "Nagyon hosszú életű; 200 e km felett figyeld a zajt." },
+      { title: "Alapjárat-szabályzó, gyújtótekercs", from: 150000, sev: "mid", cost: "30–120 e Ft", detail: "Akadozó alapjárat, rángatás." },
+    ],
+    note: "A legkevesebb bajt okozó kisbenzinesek közé tartozik — nincs turbó, nincs szíjhatáridő.",
+  },
+  {
+    m: /\b1[.,][04]\s*boosterjet\b|\bk10c\b|\bk14c\b/i, name: "Suzuki BoosterJet (1.0 / 1.4 turbó)",
+    faults: [
+      { title: "Turbó és olajellátás", from: 140000, sev: "mid", cost: "200–500 e Ft",
+        detail: "Kis turbós motor: a rendszeres olajcsere itt nem opció. Sípolás vagy kék füst esetén a turbó a gyanús." },
+      { title: "Szívószelep-koksz (közvetlen befúvás)", from: 120000, sev: "mid", cost: "60–200 e Ft", detail: "Egyenetlen járás, emelkedő fogyasztás." },
+    ],
+    note: "Erős és takarékos, de már turbós — az olajcsere-fegyelem itt fontosabb, mint a szívó testvéreinél.",
+  },
+
+  {
+    m: /\b0[.,]9\s*twinair\b|\btwinair\b/i, name: "Fiat 0.9 TwinAir (2 hengeres turbó)",
+    faults: [
+      { title: "MultiAir egység (elektrohidraulikus szelepvezérlés)", from: 110000, sev: "high", cost: "400–900 e Ft",
+        detail: "Ebben a motorban sincs hagyományos szívó-vezérműtengely: egy elektrohidraulikus egység nyitja a szelepeket olajnyomással. Ha elszennyeződik vagy elromlik, az egész blokkot cserélni kell. Csak az előírt olajjal és sűrűn szervizelve él sokáig." },
+      { title: "Olajfogyás és turbó", from: 120000, sev: "mid", cost: "150–450 e Ft",
+        detail: "A kéthengeres erősen terhelt: rendszeresen ellenőrizd az olajszintet két csere között." },
+    ],
+    note: "Karakteres, takarékos motor papíron — a valóságban a fogyasztása vezetésfüggő, és a MultiAir egység komoly kockázat.",
+  },
+  {
+    m: /\b1[.,]9\s*ddis\b|\bf9q\b.*suzuki|suzuki.*\b1[.,]9\b/i, name: "Suzuki 1.9 DDiS (Renault F9Q)",
+    faults: [
+      { title: "Olajszivattyú / turbó olajellátás", from: 150000, sev: "high", cost: "300–800 e Ft",
+        detail: "Ez valójában a Renault 1.9 dCi motorja. Ismert gyengéje az olajellátás: ha a szivattyú vagy a szűrő elszennyeződik, a turbó és a főcsapágyak kapják az első csapást. Kérd el a teljes olajcsere-történetet." },
+      { title: "Kétsúlyú lendkerék és kuplung", from: 160000, sev: "mid", cost: "250–550 e Ft", detail: "Rezgés indításkor, csúszó kuplung." },
+    ],
+    note: "Erős és nyomatékos, de az olajcsere-fegyelem itt nem opció — enélkül drágán romlik el.",
+  },
+
+  /* ---------- Renault / Nissan / Dacia ---------- */
+  {
+    m: /\b0[.,]9\s*tce\b|\bh4b\b/i, name: "Renault 0.9 TCe (3 hengeres turbó)",
+    faults: [
+      { title: "Vezérműlánc nyúlása", from: 100000, sev: "high", cost: "250–500 e Ft",
+        detail: "Ennél a kis turbós motornál a lánc korán nyúlni kezd. Hidegindításkor csörgés — ha hallod, alkudj vagy lépj tovább." },
+      { title: "Turbó és olajfogyás", from: 130000, sev: "mid", cost: "200–450 e Ft", detail: "Ellenőrizd az olajszintet és a kék füstöt." },
+    ],
+  },
+  {
+    m: /\b1[.,]3\s*tce\b|\bh5h\b/i, name: "Renault/Mercedes 1.3 TCe (H5H)",
+    faults: [
+      { title: "Szívószelep-koksz és olajfogyás", from: 100000, sev: "mid", cost: "80–300 e Ft",
+        detail: "Közvetlen befúvású turbós motor: a szelepekre koksz rakódik. Néhány korai szériánál olajfogyást is jelentettek — nézd meg a nívópálcát." },
+      { title: "Turbó olajellátása", from: 140000, sev: "mid", cost: "200–500 e Ft", detail: "A rendszeres olajcsere itt kritikus." },
+    ],
+    note: "A Renault és a Mercedes közös fejlesztése — az elődeinél jóval kulturáltabb és kiforrottabb.",
+  },
+  {
+    m: /\b1[.,]0\s*sce\b|\bb4d\b|\b1[.,]2\s*16v\b|\bd4f\b/i, name: "Renault/Dacia 1.0 SCe / 1.2 16V (szívó)",
+    faults: [
+      { title: "Vezérműlánc nyúlása", from: 150000, sev: "mid", cost: "180–400 e Ft", detail: "Hidegindításkor csörgés; a Dacia/Renault kisbenzineseknél tipikus." },
+      { title: "Gyújtótekercs, alapjárat", from: 140000, sev: "mid", cost: "30–110 e Ft", detail: "Rángatás, akadozó alapjárat." },
+    ],
+    note: "Egyszerű, olcsó motor — nincs turbó és nincs szíjhatáridő.",
+  },
+  {
+    m: /\b1[.,]6\s*16v\b|\bk4m\b|\b2[.,]0\s*16v\b|\bf4r\b/i, name: "Renault 1.6 / 2.0 16V (K4M / F4R)",
+    faults: [
+      { title: "Vezérműszíj", from: 90000, sev: "high", cost: "80–200 e Ft",
+        detail: "Kb. 120 e km-enként; szakadás esetén a szelepek nekimennek a dugattyúnak. Kérj SZÁMLÁT a cseréről." },
+      { title: "Gyújtótekercs-léc, szelephézag", from: 150000, sev: "mid", cost: "30–120 e Ft", detail: "Rángatás, egyenetlen járás." },
+    ],
+    note: "Egyszerű, megbízható szívómotor — az egyetlen komoly tétele a vezérműszíj határideje.",
+  },
+  {
+    m: /\bhr16de\b|\b1[.,]6\s*hr16\b|\bmr20de\b|\b2[.,]0\s*mr20\b/i, name: "Nissan HR16DE / MR20DE (szívó benzin)",
+    faults: [
+      { title: "Vezérműlánc", from: 170000, sev: "mid", cost: "200–450 e Ft", detail: "Hosszú életű; magas km-nél figyeld a hidegindítási zajt." },
+      { title: "Szívócső, gyújtótekercs", from: 150000, sev: "mid", cost: "40–150 e Ft", detail: "Rángatás, hibás alapjárat." },
+    ],
+    note: "Megbízható szívómotorok — a Nissan/Renault kínálat legkevesebb bajt okozó egységei.",
+  },
+  {
+    m: /\b2[.,]3\s*dci\b|\bm9t\b/i, name: "Renault/Nissan 2.3 dCi (M9T)",
+    faults: [
+      { title: "Injektorok és nagynyomású szivattyú", from: 150000, sev: "high", cost: "300–900 e Ft",
+        detail: "Haszonjármű-motor: ha a szivattyú belül kopik, fémforgács kerül az egész üzemanyagrendszerbe, és mindent cserélni kell." },
+      { title: "Turbó és EGR-hűtő", from: 180000, sev: "mid", cost: "250–600 e Ft", detail: "Teljesítményvesztés, füstölés." },
+    ],
+  },
+
+  /* ---------- Toyota / Honda / Mazda ---------- */
+  {
+    m: /\b1[.,]8\s*hybrid\b|\b2[.,]0\s*hybrid\b|\b2[.,]5\s*hybrid\b|\b1[.,]5\s*hybrid\b/i, name: "Toyota/Lexus hibrid hajtáslánc",
+    faults: [
+      { title: "Hajtásakkumulátor kapacitásvesztés", from: 180000, sev: "high", cost: "400 e – 1,2 M Ft",
+        detail: "MINDIG kérj akkumulátor-egészség (SoH) mérést. A Toyota hibrid hajtáslánca egyébként rendkívül tartós — nincs kuplung, váltó, vezérműszíj." },
+      { title: "Inverter hűtőrendszer, 12 V-os akku", from: 150000, sev: "mid", cost: "40–350 e Ft",
+        detail: "A 12 voltos kisakku gyengülése rejtélyes elektromos hibákat okoz — olcsó tétel, de sokan elfelejtik." },
+    ],
+    note: "A piac egyik legmegbízhatóbb hajtáslánca; a kockázat gyakorlatilag egyetlen tételre, az akkumulátorra szűkül.",
+  },
+  {
+    m: /\b2[.,][58]\s*d-?4d\b|\b1kd\b|\b2gd\b|\b1gd\b/i, name: "Toyota 2.5 / 2.8 D-4D (haszon és terep)",
+    faults: [
+      { title: "DPF eltömődés és olajhígulás", from: 120000, sev: "high", cost: "150–600 e Ft",
+        detail: "Rövid, városi utakon a DPF nem tud regenerálódni, a be nem égett gázolaj pedig az olajba kerül és felhígítja azt. Nézd meg a nívópálcát: ha a szint a MAX fölött van és gázolajszagú, az árulkodó." },
+      { title: "Turbó és EGR kokszolódás", from: 180000, sev: "mid", cost: "250–650 e Ft", detail: "Teljesítményvesztés, füstölés." },
+    ],
+    note: "Alapvetően nagyon szívós, terepre való motorok — a városi használat viszont nem tesz jót nekik.",
+  },
+  {
+    m: /\b1[.,][245]\s*i-?vtec\b|\b1[.,]8\s*i-?vtec\b|\b2[.,]0\s*i-?vtec\b|\br18\b|\bl13\b|\bl15\b|\bk20\b/i,
+    name: "Honda i-VTEC (szívó benzin)",
+    faults: [
+      { title: "Vezérműlánc", from: 200000, sev: "mid", cost: "200–450 e Ft", detail: "Nagyon hosszú életű; 250 e km felett figyeld a zajt." },
+      { title: "Olajfogyás és szelephézag-állítás", from: 150000, sev: "mid", cost: "40–200 e Ft",
+        detail: "A Honda motorok szelephézagát állítani kell (kb. 100 e km-enként) — kérdezz rá, megtörtént-e." },
+    ],
+    note: "A legmegbízhatóbb benzinesek közé tartozik: nincs turbó, nincs közvetlen befúvás, nincs szíjhatáridő.",
+  },
+  {
+    m: /\b1[.,]6\s*i-?dtec\b|\bn16\b/i, name: "Honda 1.6 i-DTEC",
+    faults: [
+      { title: "DPF és EGR eltömődés", from: 120000, sev: "high", cost: "200–600 e Ft",
+        detail: "Városi, rövid utas használatnál gyorsan eltömődik. Ez a motor autópályára való — ha csak városban jársz, ne ezt válaszd." },
+      { title: "Injektorok", from: 170000, sev: "mid", cost: "120–350 e Ft / db", detail: "Nehéz indítás, egyenetlen járás." },
+    ],
+  },
+  {
+    m: /\b1[.,]3\s*mzr\b|\b1[.,]6\s*mzr\b|\b2[.,]0\s*mzr\b|\bz6\b|\blf-?ve\b/i, name: "Mazda MZR (szívó benzin)",
+    faults: [
+      { title: "Vezérműlánc és VVT-szelep", from: 160000, sev: "mid", cost: "180–420 e Ft", detail: "Hidegindításkor kopogó hang; a VVT-szelep eltömődése tipikus." },
+      { title: "Korrózió a karosszérián", from: 0, sev: "mid", cost: "100–600 e Ft",
+        detail: "Ennél a generációnál a hátsó kerékjárat és a küszöb korrózióvédelme gyenge — a motornál is fontosabb, hogy alulról megnézd." },
+    ],
+  },
+
+  /* ---------- Hyundai / Kia ---------- */
+  {
+    m: /\b1[.,]0\s*t-?gdi\b|\b1[.,]4\s*t-?gdi\b|\bg3lc\b/i, name: "Hyundai/Kia 1.0 / 1.4 T-GDI",
+    faults: [
+      { title: "Szívószelep-koksz", from: 110000, sev: "mid", cost: "60–200 e Ft", detail: "Közvetlen befúvás velejárója: egyenetlen járás, emelkedő fogyasztás." },
+      { title: "Turbó és olajellátás", from: 140000, sev: "mid", cost: "200–500 e Ft", detail: "A rendszeres olajcsere kritikus ezeknél a kis turbós motoroknál." },
+    ],
+    note: "Modern, takarékos motorok; sok darabon még él a 7 éves gyári garancia — kérdezz rá.",
+  },
+  {
+    m: /\b2[.,]0\s*mpi\b|\bg4na\b|\bg4kd\b/i, name: "Hyundai/Kia 2.0 MPI (szívó benzin)",
+    faults: [
+      { title: "Vezérműlánc", from: 180000, sev: "mid", cost: "200–450 e Ft", detail: "Hosszú életű; magas km-nél figyeld a hidegindítási zajt." },
+      { title: "Olajfogyás (egyes szériák)", from: 150000, sev: "mid", cost: "ellenőrzés + olaj", detail: "Rendszeresen nézd az olajszintet két csere között." },
+    ],
+    note: "Egyszerű, turbó nélküli motor — a márka kínálatának egyik legkiszámíthatóbb egysége.",
+  },
+  {
+    m: /\b1[.,]1\s*crdi\b|\b1[.,]4\s*crdi\b|\b2[.,]2\s*crdi\b|\bd4fc\b|\bd4hb\b/i, name: "Hyundai/Kia CRDi (1.1–2.2)",
+    faults: [
+      { title: "DPF eltömődés városi használatnál", from: 120000, sev: "high", cost: "200–600 e Ft",
+        detail: "Rövid utakon nem tud regenerálódni. Ha csak városban jársz, ne dízelt válassz ebből a kínálatból." },
+      { title: "Injektorok és turbó", from: 160000, sev: "mid", cost: "150–500 e Ft", detail: "Nehéz indítás, füstölés, teljesítményvesztés." },
+      { title: "Vezérműszíj vagy lánc — típusfüggő!", from: 120000, sev: "high", cost: "100–300 e Ft",
+        detail: "A CRDi család egy részében SZÍJ van, másik részében lánc. Vásárlás előtt tisztázd, melyik van benne, és mikor cserélték." },
+    ],
+  },
+
+  /* ---------- BMW / Mercedes újabb motorok ---------- */
+  {
+    m: /\bb38\b|\bb58\b/i, name: "BMW B38 / B58 (modern benzin)",
+    faults: [
+      { title: "Vezérműlánc és feszítő (korai B38)", from: 120000, sev: "mid", cost: "300–700 e Ft",
+        detail: "A korai háromhengeres B38-nál előfordult láncnyúlás; hidegindításkor hallgasd meg. A B58 hathengeres ebből a szempontból nagyon jó hírű." },
+      { title: "Hűtőrendszer és olajszivárgás", from: 140000, sev: "mid", cost: "150–500 e Ft", detail: "A szelepfedél-tömítés és a hűtőcsövek elöregednek." },
+    ],
+    note: "A B58 hathengeres a BMW egyik legjobb modern motorja — erős és tartós.",
+  },
+  {
+    m: /\bm47\b/i, name: "BMW M47 dízel (2.0, 1998–2007)",
+    faults: [
+      { title: "Örvényszelep (swirl flap) letörés", from: 150000, sev: "high", cost: "600 e – 2 M Ft",
+        detail: "A szívócső örvényszelepei letörhetnek és beszívódnak a hengerbe — ez azonnali motorkár. Sokan preventíven kiszerelik; kérdezz rá, megtörtént-e." },
+      { title: "Vezérműlánc és vákuumszivattyú", from: 200000, sev: "mid", cost: "250–600 e Ft", detail: "Zaj a motor elejéről, fékrásegítés gyengülése." },
+    ],
+  },
+  {
+    m: /\bn57\b|\b(30|35)d\b/i, name: "BMW N57 dízel (3.0 hathengeres)",
+    faults: [
+      { title: "Örvényszelep és EGR-hűtő", from: 150000, sev: "high", cost: "300 e – 1,5 M Ft",
+        detail: "Az EGR-hűtő repedése hűtővizet enged a szívórendszerbe; súlyos esetben motorkár. Több visszahívás is volt rá — kérdezz rá az alvázszám alapján." },
+      { title: "Vezérműlánc (hátul) és turbó", from: 180000, sev: "high", cost: "500 e – 1,8 M Ft",
+        detail: "A lánc a motor hátulján van, a javításhoz ki kell emelni a motort. A kettős feltöltésű változatoknál a turbók is drágák." },
+    ],
+    note: "Nagyon erős és kulturált motor — de ha elromlik, prémium árakon romlik el.",
+  },
+  {
+    m: /\bm274\b|\bm264\b|\b(180|200|250)\s*(4matic|amg\s*line)?\b.*(mercedes|benz).*20\d\d/i,
+    name: "Mercedes M274 / M264 (modern turbó benzin)",
+    faults: [
+      { title: "Vezérműlánc és feszítő", from: 130000, sev: "mid", cost: "300–700 e Ft", detail: "Hidegindításkor csörgés; a korai M274-eknél gyakoribb." },
+      { title: "Szívószelep-koksz és nagynyomású szivattyú", from: 120000, sev: "mid", cost: "100–400 e Ft", detail: "Közvetlen befúvás velejárója." },
+    ],
+    note: "Az M264 már lágyhibrid rásegítéssel megy, és érezhetően kiforrottabb az elődjénél.",
+  },
+  {
+    m: /\bom654\b|\b(200|220)\s*d\b.*(201[7-9]|202\d)/i, name: "Mercedes OM654 (2.0 d, 2016+)",
+    faults: [
+      { title: "AdBlue-rendszer és NOx-érzékelő", from: 120000, sev: "mid", cost: "150–500 e Ft",
+        detail: "A modern dízelek visszatérő bosszúsága: hibaüzenet, indításmegtagadás. Kérdezz rá, cserélték-e már." },
+      { title: "DPF városi használatnál", from: 150000, sev: "mid", cost: "200–600 e Ft", detail: "Rövid utakon nem tud regenerálódni." },
+    ],
+    note: "Az OM651 utódja: alumínium blokk, jóval csendesebb, és MENTES az elődje injektor- és láncgondjaitól. Ez a jobbik választás.",
+  },
+
+  /* ---------- PSA, Fiat, Mitsubishi, Volvo, JLR kiegészítés ---------- */
+  {
+    m: /\b1[.,]5\s*bluehdi\b|\bdv5\b/i, name: "PSA 1.5 BlueHDi (DV5)",
+    faults: [
+      { title: "AdBlue-rendszer hibái", from: 90000, sev: "mid", cost: "150–450 e Ft",
+        detail: "Szivattyú- és érzékelőhibák, hibaüzenet, végül indításmegtagadás. Kérdezz rá, volt-e vele gond." },
+      { title: "Turbó és olajellátás", from: 150000, sev: "mid", cost: "200–500 e Ft", detail: "A rendszeres olajcsere itt is kritikus." },
+    ],
+    note: "Kiugróan takarékos motor (4 l/100 km alatt is megy) — a fő kockázata nem mechanikai, hanem az AdBlue-elektronika.",
+  },
+  {
+    m: /\b2[.,]0\s*bluehdi\b|\bdw10f\b/i, name: "PSA 2.0 BlueHDi (DW10)",
+    faults: [
+      { title: "AdBlue-rendszer és NOx-érzékelő", from: 100000, sev: "mid", cost: "150–500 e Ft", detail: "Hibaüzenet, indításmegtagadás." },
+      { title: "Turbó, EGR és kétsúlyú lendkerék", from: 170000, sev: "mid", cost: "250–700 e Ft", detail: "Teljesítményvesztés, rezgés indításkor." },
+    ],
+    note: "Erős, nyomatékos és tartós dízel — a PSA-kínálat legjobb nagymotorja.",
+  },
+  {
+    m: /\b1[.,]8\s*(20v\s*)?turbo\b|\bapy\b|\bbam\b|\bawt\b/i, name: "1.8 20V Turbo (VW-csoport, 1997–2006)",
+    faults: [
+      { title: "Olajiszap és turbó-olajellátás", from: 140000, sev: "high", cost: "300 e – 1,2 M Ft",
+        detail: "Ennek a motornak A hibája: a hosszú olajcsere-ciklus miatt olajiszap képződik, ami eltömíti a turbó olajellátását. Vedd le az olajbetöltő sapkát és nézd meg, van-e iszap a fedél alatt." },
+      { title: "Vezérműszíj és vízpumpa", from: 90000, sev: "high", cost: "100–250 e Ft", detail: "Kb. 100–120 e km; szakadás esetén motorkár." },
+    ],
+  },
+  {
+    m: /\b1[.,]8\s*tdci\b|\b1[.,]8\s*duratorq\b/i, name: "Ford 1.8 TDCi (Duratorq)",
+    faults: [
+      { title: "Vezérműszíj", from: 90000, sev: "high", cost: "80–200 e Ft", detail: "Kb. 120 e km; szakadás esetén motorkár." },
+      { title: "Injektorok és nagynyomású szivattyú", from: 160000, sev: "mid", cost: "150–450 e Ft", detail: "Nehéz indítás, egyenetlen járás, füstölés." },
+    ],
+    note: "Régi vágású, egyszerű dízel — DPF nélküli darabjai olcsón tarthatók.",
+  },
+  {
+    m: /\b1[.,]6\s*e-?torq\b|\bfire\s*evo\b/i, name: "Fiat 1.6 E-Torq (szívó benzin)",
+    faults: [
+      { title: "Vezérműszíj", from: 90000, sev: "high", cost: "80–200 e Ft", detail: "Kb. 100–120 e km-enként; szakadás esetén motorkár." },
+      { title: "Gyújtótekercs, alapjárat", from: 150000, sev: "mid", cost: "30–120 e Ft", detail: "Rángatás, akadozó alapjárat." },
+    ],
+    note: "Egyszerű, turbó nélküli motor — a MultiAir-nél sokkal kevesebb kockázattal.",
+  },
+  {
+    m: /\b2[.,]2\s*jtd\b|\bmultijet\s*ii\b/i, name: "Fiat/Alfa 2.2 JTD (2016+)",
+    faults: [
+      { title: "AdBlue és DPF", from: 120000, sev: "mid", cost: "200–600 e Ft", detail: "Városi használatnál gyakoribb hiba; hibaüzenet, teljesítménykorlátozás." },
+      { title: "Turbó és injektorok", from: 170000, sev: "mid", cost: "250–700 e Ft", detail: "Teljesítményvesztés, füstölés." },
+    ],
+  },
+  {
+    m: /\bmivec\b|\b4b1[01]\b|\b4a9\d\b/i, name: "Mitsubishi MIVEC (szívó benzin)",
+    faults: [
+      { title: "Vezérműlánc", from: 180000, sev: "mid", cost: "180–420 e Ft", detail: "Hosszú életű; magas km-nél figyeld a hidegindítási zajt." },
+      { title: "Alapjárat-szabályzó, gyújtótekercs", from: 150000, sev: "mid", cost: "30–130 e Ft", detail: "Akadozó alapjárat, rángatás." },
+    ],
+    note: "Egyszerű, tartós motorok — a magyar szervizháttér viszont vékonyabb, mint a nagy márkáknál.",
+  },
+  {
+    m: /\b(1[.,]6|2[.,]0|2[.,]2)\s*di-?d\b|\b4n1\d\b/i, name: "Mitsubishi DI-D dízel",
+    faults: [
+      { title: "DPF és EGR eltömődés", from: 130000, sev: "high", cost: "200–650 e Ft", detail: "Városi használatnál gyakori; teljesítménykorlátozás, füstölés." },
+      { title: "Injektorok és turbó", from: 170000, sev: "mid", cost: "200–600 e Ft", detail: "Nehéz indítás, egyenetlen járás." },
+    ],
+  },
+  {
+    m: /\bphev\b|\bplug-?in\s*hybrid\b|\btölthető hibrid\b/i, name: "Tölthető hibrid (PHEV) hajtáslánc",
+    faults: [
+      { title: "Hajtásakkumulátor kapacitásvesztés", from: 100000, sev: "high", cost: "1 – 3 M Ft",
+        detail: "A PHEV akkumulátor kisebb, mint egy elektromos autóé, ezért ARÁNYLAG többet dolgozik: naponta töltik és merítik. SoH-mérés nélkül ne vedd meg. Kérdezd meg, tényleg töltötték-e — a soha nem töltött PHEV a legrosszabb vétel." },
+      { title: "Fékek berágódása és 12 V-os akku", from: 80000, sev: "mid", cost: "60–250 e Ft",
+        detail: "A rekuperáció miatt a mechanikus fék alig dolgozik, ezért berozsdásodik és megszorul." },
+    ],
+    note: "Csak akkor éri meg, ha van otthoni töltésed. Enélkül nehéz, drága benzinesként megy, és minden hátrányát megkapod.",
+  },
+  {
+    m: /\b2[.,]2\s*td4\b|\b2[.,]2\s*(sd4|ed4)\b/i, name: "Land Rover 2.2 TD4 (PSA-eredetű)",
+    faults: [
+      { title: "DPF és turbó", from: 130000, sev: "high", cost: "250–800 e Ft",
+        detail: "Nehéz autó, kis motor: a turbó és a DPF komoly terhelést kap. Városi használatnál különösen." },
+      { title: "Kétsúlyú lendkerék és kuplung", from: 150000, sev: "mid", cost: "250–600 e Ft", detail: "Rezgés indításkor, csúszó kuplung." },
+    ],
+  },
+  {
+    m: /\b4[.,]0\s*tdi\b|\bv8\s*tdi\b/i, name: "VW-csoport 4.0 TDI V8",
+    faults: [
+      { title: "VEZÉRMŰLÁNC a motor hátulján", from: 150000, sev: "high", cost: "1,5 – 3 M Ft",
+        detail: "Mint a 3.0 TDI-nél, a lánc a motor hátulján van — a javításhoz ki kell emelni a motort. Ebben a méretben ez az egyik legdrágább javítás a piacon." },
+      { title: "Turbók, AdBlue, légrugózás", from: 150000, sev: "high", cost: "500 e – 2 M Ft",
+        detail: "Ennél a kategóriánál nem egy alkatrész drága, hanem mindegyik. Csak akkor vedd meg, ha van rá kerete a fenntartásnak." },
+    ],
+    note: "Csodálatos motor, félelmetes fenntartási költséggel. Használtan ez a vétel nem a vételárról szól.",
+  },
+  {
+    m: /\bb5254\b|\bt5\b.*volvo|volvo.*\bt5\b/i, name: "Volvo öthengeres benzin (T5)",
+    faults: [
+      { title: "PCV / olajleválasztó eltömődése", from: 130000, sev: "high", cost: "150–400 e Ft",
+        detail: "A kartergáz-szelep eltömődik, a nyomás kinyomja a szimmeringeket — olajfolyás mindenhol. Teszt: járó motornál az olajbetöltő sapkát nehéz legyen leemelni." },
+      { title: "Turbó és olajellátás", from: 160000, sev: "mid", cost: "250–600 e Ft", detail: "Kék füst, sípolás terhelés alatt." },
+    ],
+  },
 ];
 
 /* ---------- Váltó-specifikus tudás ---------- */

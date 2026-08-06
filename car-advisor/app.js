@@ -715,11 +715,16 @@ function buildForecast(d) {
     urgency: km >= 180000 ? "esedékes" : "figyeld",
     detail: "Hidegindításkor csörgő/zörgő hang az árulkodó jel. Sok modellnél 150–250 e km körül jelentkezik, és a javítás motorbontással jár.",
     estCost: "kb. 200–700 e Ft" });
-  push(d.gearbox === "Automata", { title: "Automata / DSG váltóolaj csere", kind: "karbantartás",
+  /* A hibrid és az elektromos „automata” NEM hagyományos váltó: a Toyota-féle
+     eCVT egy bolygóműves osztó, az elektromosban pedig egyfokozatú áttétel van.
+     Nincs bennük kuplungcsomag és nincs DSG-szerű olajcsere-határidő — ezekre
+     tehát nem szabad váltóolaj- vagy kuplungtételt kiírni. */
+  const trueAuto = d.gearbox === "Automata" && d.fuel !== "Hibrid" && d.fuel !== "Elektromos";
+  push(trueAuto, { title: "Automata / DSG váltóolaj csere", kind: "karbantartás",
     urgency: km >= 60000 ? "esedékes" : "figyeld",
     detail: "Sokan kihagyják — kihagyva a váltó tönkremehet, ami a legdrágább javítások egyike. Kérj rá dokumentumot.",
     estCost: "kb. 60–150 e Ft" });
-  push(d.gearbox === "Automata" && km >= 150000, { title: "Automata váltó / DSG kuplung felújítás", kind: "meghibásodás",
+  push(trueAuto && km >= 150000, { title: "Automata váltó / DSG kuplung felújítás", kind: "meghibásodás",
     urgency: km >= 200000 ? "esedékes" : "figyeld",
     detail: "Rángatás, késés, csúszás a jele. 150–250 e km felett reális kockázat.",
     estCost: "kb. 300–900 e Ft" });
@@ -905,7 +910,7 @@ function renderResult(a, d, isDemo) {
 
     <div class="block"><h4>Összegzés</h4><p>${esc(a.summary)}</p></div>
 
-    ${a.mainRisk ? renderMainRisk(a.mainRisk, d) : ""}
+    ${a.mainRisk ? renderMainRisk(a.mainRisk, d) : renderNoRisk(d)}
 
     ${forecast ? `<div class="block--key">
       <h4 style="display:flex;align-items:center;gap:11px;margin:0 0 6px;font-size:0.71rem;
@@ -967,6 +972,27 @@ function renderResult(a, d, isDemo) {
     };
     requestAnimationFrame(step);
   }
+}
+
+/* Ha nem találtunk kiemelkedő kockázatot, azt KI KELL MONDANI — az üres hely
+   úgy néz ki, mintha elromlott volna valami, pedig ez jó hír. */
+function renderNoRisk(d) {
+  const km = d.km.toLocaleString("hu-HU");
+  return `
+    <section class="mainrisk mainrisk--calm">
+      <div class="mainrisk__head">
+        <span class="mainrisk__eyebrow">A legnagyobb kockázat · ${km} km-nél</span>
+        <h3 class="mainrisk__title">Ennél a futásnál nincs kiemelkedő kockázat</h3>
+      </div>
+      <dl class="mainrisk__body">
+        <div><dt>Mit jelent ez?</dt><dd>Az adatbázisunkban ehhez a hajtáslánchoz nincs olyan
+          tipikus meghibásodás, ami ${km} km körül jellemzően bekövetkezne. Ez jó jel — de nem
+          garancia: a konkrét darab állapota és előélete ennél többet számít.</dd></div>
+        <div><dt>Mit nézz meg akkor is?</dt><dd>Szerviztörténet és valós km, hidegindítás,
+          hosszabb próbaút, alulnézeti átvizsgálás (rozsda, folyás), és egy független
+          szakértői vizsgálat vásárlás előtt.</dd></div>
+      </dl>
+    </section>`;
 }
 
 /* A fő kockázat részletes bemutatása — ez az elemzés lényege */

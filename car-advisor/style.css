@@ -407,6 +407,11 @@ select.locked {
 .footer__legal { color: rgba(255, 255, 255, 0.34); font-size: 0.74rem; margin: 0;
   letter-spacing: 0.08em; text-transform: uppercase; }
 
+/* Ha nincs kiemelkedő kockázat: ugyanaz a keret, halkabb hangon */
+.mainrisk--calm { border-color: var(--line-strong); }
+.mainrisk--calm .mainrisk__head { background: var(--wash); color: var(--ink); }
+.mainrisk--calm .mainrisk__eyebrow { color: var(--smoke); }
+
 /* ============================================================
    TÍPUSAJÁNLÓ — a fő szolgáltatás
    ============================================================ */
